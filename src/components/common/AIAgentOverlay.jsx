@@ -1,0 +1,262 @@
+import React, { useRef, useEffect } from 'react';
+import { useAIAgent } from '../../context/AIAgentContext';
+import { useApp } from '../../context/AppContext';
+import { pick } from '../../utils/i18n';
+import {
+  Mic,
+  MicOff,
+  X,
+  Sparkles,
+  Volume2,
+  StopCircle,
+  Bot,
+  User,
+  CheckCircle2,
+  AlertCircle,
+  ChevronDown,
+  Headphones,
+  Power
+} from 'lucide-react';
+
+export default function AIAgentOverlay() {
+  const {
+    isAgentActive,
+    isAgentPanelOpen,
+    setIsAgentPanelOpen,
+    agentState,
+    isListening,
+    isSpeaking,
+    transcript,
+    agentMessages,
+    toggleAgent,
+    startListening,
+    stopListening,
+    processUserInput
+  } = useAIAgent();
+  const { t, language } = useApp();
+
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [agentMessages]);
+
+  const handleManualSend = () => {
+    const val = inputRef.current?.value?.trim();
+    if (val) {
+      processUserInput(val);
+      inputRef.current.value = '';
+    }
+  };
+
+  const stateLabels = {
+    IDLE: pick(language, { ne: 'सहायक बन्द छ', en: 'Assistant Off', mai: 'सहायक बन्द', bho: 'सहायक बंद' }),
+    GREETING: pick(language, { ne: 'तयार छ — बोल्नुहोस्', en: 'Ready — Speak', mai: 'तैयार — बाजू', bho: 'तैयार — बोलीं' }),
+    SPEAKING: pick(language, { ne: '🔊 बोल्दैछ...', en: '🔊 Speaking...', mai: '🔊 बाजि रहल...', bho: '🔊 बोलत बा...' }),
+    LISTENING: pick(language, { ne: '🎤 सुन्दैछ...', en: '🎤 Listening...', mai: '🎤 सुनि रहल...', bho: '🎤 सुनत बा...' }),
+    PROCESSING: pick(language, { ne: 'बुझ्दैछ...', en: 'Processing...', mai: 'बुझि रहल...', bho: 'समझत बा...' }),
+    CHECKOUT_PREP: pick(language, { ne: 'अर्डर तयार...', en: 'Preparing...', mai: 'अर्डर तैयार...', bho: 'आर्डर तैयार...' }),
+    CONFIRMING: pick(language, { ne: 'पुष्टि चाहिन्छ', en: 'Confirm?', mai: 'पक्का करू?', bho: 'पक्का करीं?' }),
+    PAYMENT_SELECT: pick(language, { ne: '💳 भुक्तानी छान्नुहोस्', en: '💳 Choose payment', mai: '💳 भुगतान चुनू', bho: '💳 भुगतान चुनीं' }),
+    PLACING_ORDER: pick(language, { ne: 'अर्डर पठाउँदैछ...', en: 'Placing...', mai: 'अर्डर पठा रहल...', bho: 'आर्डर भेजत बा...' }),
+    ORDER_DONE: pick(language, { ne: '✅ अर्डर भयो!', en: '✅ Done!', mai: '✅ अर्डर भेल!', bho: '✅ आर्डर भइल!' }),
+    ERROR: pick(language, { ne: '⚠️ समस्या', en: '⚠️ Error', mai: '⚠️ समस्या', bho: '⚠️ समस्या' }),
+  };
+
+  return (
+    <>
+      {/* ── Floating AI Agent FAB Button ── */}
+      <div className="ai-agent-fab-container">
+        <button
+          type="button"
+          className={`ai-agent-fab ${isAgentActive ? 'active' : ''} ${isListening ? 'listening' : ''}`}
+          onClick={() => {
+            if (!isAgentActive) {
+              toggleAgent();
+            } else {
+              setIsAgentPanelOpen(!isAgentPanelOpen);
+            }
+          }}
+          aria-label="AI Assistant"
+        >
+          {isListening && <div className="fab-ripple-ring"></div>}
+          <div className="fab-icon-inner">
+            {isAgentActive ? (
+              isListening ? <Mic size={28} className="mic-pulse" /> : <Bot size={28} />
+            ) : (
+              <Headphones size={28} />
+            )}
+          </div>
+        </button>
+
+        {/* Status Pill */}
+        {isAgentActive && (
+          <div className="agent-status-pill" onClick={() => setIsAgentPanelOpen(!isAgentPanelOpen)}>
+            <span className={`status-dot ${isListening ? 'listening' : 'ready'}`}></span>
+            <span className="status-text">
+              {isSpeaking
+                ? stateLabels.SPEAKING
+                : isListening
+                  ? stateLabels.LISTENING
+                  : stateLabels[agentState] || stateLabels.GREETING}
+            </span>
+          </div>
+        )}
+
+        {/* Inactive label */}
+        {!isAgentActive && (
+          <div className="agent-activate-label" onClick={toggleAgent}>
+            <Sparkles size={14} />
+            <span>
+              {pick(language, { ne: 'एआई सहायक सुरु गर्नुहोस्', en: 'Start AI Assistant', mai: 'एआई सहायक सुरु करू', bho: 'एआई सहायक सुरू करीं' })}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* ── Agent Conversation Panel ── */}
+      {isAgentPanelOpen && isAgentActive && (
+        <div className="agent-panel-backdrop" onClick={() => setIsAgentPanelOpen(false)}>
+          <div className="agent-panel" onClick={(e) => e.stopPropagation()}>
+            {/* Panel Header */}
+            <div className="agent-panel-header">
+              <div className="agent-header-left">
+                <div className="agent-avatar-box">
+                  <Bot size={22} />
+                </div>
+                <div>
+                  <h3 className="agent-title">
+                    {pick(language, { ne: 'मामा जी एआई सहायक', en: 'Mama Ji AI Assistant', mai: 'मामा जी एआई सहायक', bho: 'मामा जी एआई सहायक' })}
+                  </h3>
+                  <span className={`agent-state-badge ${isSpeaking ? 'speaking' : isListening ? 'listening' : agentState.toLowerCase()}`}>
+                    {isSpeaking
+                      ? stateLabels.SPEAKING
+                      : isListening
+                        ? stateLabels.LISTENING
+                        : stateLabels[agentState] || stateLabels.GREETING}
+                  </span>
+                </div>
+              </div>
+              <div className="agent-header-actions">
+                <button
+                  type="button"
+                  className="btn-agent-power"
+                  onClick={toggleAgent}
+                  title="Turn off assistant"
+                >
+                  <Power size={18} />
+                </button>
+                <button
+                  type="button"
+                  className="btn-agent-minimize"
+                  onClick={() => setIsAgentPanelOpen(false)}
+                >
+                  <ChevronDown size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Messages Area */}
+            <div className="agent-messages-area">
+              {agentMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`agent-msg ${msg.sender === 'agent' ? 'from-agent' : 'from-user'} ${msg.type}`}
+                >
+                  <div className="msg-avatar">
+                    {msg.sender === 'agent' ? <Bot size={16} /> : <User size={16} />}
+                  </div>
+                  <div className="msg-bubble">
+                    <p className="msg-text">{msg.text}</p>
+                    <span className="msg-time">
+                      {msg.timestamp.toLocaleTimeString('ne-NP', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {/* Live Transcript Preview */}
+              {isListening && transcript && (
+                <div className="agent-msg from-user live-transcript">
+                  <div className="msg-avatar"><Mic size={16} /></div>
+                  <div className="msg-bubble">
+                    <p className="msg-text live">{transcript}...</p>
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Bottom Controls */}
+            <div className="agent-panel-footer">
+              {/* Manual text input for users who prefer typing */}
+              <div className="agent-input-row">
+                <input
+                  type="text"
+                  ref={inputRef}
+                  className="agent-text-input"
+                  placeholder={pick(language, {
+                    ne: 'यहाँ टाइप गर्नुहोस् वा माइक थिच्नुहोस्...',
+                    en: 'Type here or press mic...',
+                    mai: 'एतय टाइप करू वा माइक थिचू...',
+                    bho: 'इहाँ टाइप करीं भा माइक दबाईं...'
+                  })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleManualSend();
+                  }}
+                />
+                <button
+                  type="button"
+                  className="btn-agent-send"
+                  onClick={handleManualSend}
+                >
+                  →
+                </button>
+              </div>
+
+              {/* Hands-free hint — the mic below is only a manual fallback */}
+              <p className="agent-handsfree-hint">
+                {pick(language, {
+                  ne: '✨ बस बोल्नुहोस् — केही थिच्नु पर्दैन। "हो" भन्दा अर्डर आफैं हुन्छ।',
+                  en: '✨ Just speak — no need to press. Say "Yes" and it orders itself.',
+                  mai: '✨ बस बाजू — किछु थिचय के जरूरत नै। "हँ" कहलापर अर्डर आपसे भऽ जाइत अछि।',
+                  bho: '✨ बस बोलीं — कुछु दबावे के जरूरत नइखे। "हँ" कहला पर आर्डर अपने-आप हो जाला।'
+                })}
+              </p>
+
+              {/* Big Mic Toggle (manual fallback) */}
+              <div className="agent-mic-row">
+                <button
+                  type="button"
+                  className={`agent-mic-btn ${isListening ? 'active' : ''}`}
+                  onClick={() => {
+                    if (isListening) {
+                      stopListening();
+                    } else {
+                      startListening();
+                    }
+                  }}
+                >
+                  {isListening ? (
+                    <>
+                      <StopCircle size={20} />
+                      <span>{pick(language, { ne: 'रोक्नुहोस्', en: 'Stop', mai: 'रोकू', bho: 'रोकीं' })}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Mic size={20} />
+                      <span>{pick(language, { ne: '🎤 बोल्नुहोस्', en: '🎤 Speak', mai: '🎤 बाजू', bho: '🎤 बोलीं' })}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

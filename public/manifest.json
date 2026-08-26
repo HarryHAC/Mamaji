@@ -1,0 +1,27 @@
+{
+  "name": "Mama Ji — Voice Grocery",
+  "short_name": "Mama Ji",
+  "description": "Order groceries by voice in Nepali, Maithili, Bhojpuri & English. No typing needed.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EDF2F0",
+  "theme_color": "#1E6B47",
+  "lang": "ne",
+  "categories": ["shopping", "food", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
