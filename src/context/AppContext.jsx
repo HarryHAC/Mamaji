@@ -18,7 +18,7 @@ export function AppProvider({ children }) {
     const saved = localStorage.getItem('apna_shops');
     return saved ? JSON.parse(saved) : INITIAL_SHOPS;
   });
-  const [selectedShopId, setSelectedShopId] = useState('shop-1');
+  const [selectedShopId, setSelectedShopId] = useState(null);
 
   // Customer Cart: array of { product, quantity, unit }
   const [cart, setCart] = useState(() => {
@@ -39,17 +39,18 @@ export function AppProvider({ children }) {
       name: '',
       phone: '',
       email: '',
-      address: 'नयाँ बानेश्वर, काठमाडौं',
+      address: '',
       hasLocationPermission: false,
-      lat: 27.693,
-      lng: 85.338
+      lat: null,
+      lng: null
     };
   });
 
   // Sync role + customer profile to the authenticated account.
   useEffect(() => {
     if (currentUser) {
-      setRole(prev => (prev === 'entry' ? currentUser.role : prev));
+      // Role is locked to the account type — a customer never sees the owner UI and vice-versa.
+      setRole(currentUser.role);
       setCustomerInfo(prev => ({
         ...prev,
         name: currentUser.name || prev.name,
@@ -110,7 +111,19 @@ export function AppProvider({ children }) {
     }, 3500);
   };
 
-  const selectedShop = shops.find(s => s.id === selectedShopId) || shops[0];
+  const selectedShop = shops.find(s => s.id === selectedShopId) || shops[0] || null;
+
+  // Auto-select a shop for the customer once shops exist (or the current one vanishes).
+  useEffect(() => {
+    if (shops.length === 0) {
+      if (selectedShopId !== null) setSelectedShopId(null);
+      return;
+    }
+    if (!shops.some(s => s.id === selectedShopId)) {
+      setSelectedShopId(shops[0].id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shops]);
 
   // Orders belonging to the logged-in customer (their own history/tracking).
   const myOrders = currentUser
@@ -160,6 +173,10 @@ export function AppProvider({ children }) {
 
   // Place Order Action
   const placeOrder = (orderData) => {
+    if (!selectedShop) {
+      showToast('कुनै पसल छानिएको छैन', 'error');
+      return null;
+    }
     const newOrder = {
       id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
       shopId: selectedShop.id,

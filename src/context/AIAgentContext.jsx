@@ -113,6 +113,7 @@ export function AIAgentProvider({ children }) {
   const [isAgentActive, setIsAgentActive] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [micBlocked, setMicBlocked] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [agentMessages, setAgentMessages] = useState([]);
   const [pendingOrderData, setPendingOrderData] = useState(null);
@@ -230,7 +231,7 @@ export function AIAgentProvider({ children }) {
     recognition.interimResults = true;  // live transcript for the UI
     recognition.maxAlternatives = 1;
 
-    recognition.onstart = () => setIsListening(true);
+    recognition.onstart = () => { setIsListening(true); setMicBlocked(false); };
 
     recognition.onresult = (event) => {
       if (isSpeakingRef.current) return; // ignore anything captured while we talk
@@ -260,9 +261,10 @@ export function AIAgentProvider({ children }) {
 
     recognition.onerror = (event) => {
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-        // Mic permission denied — stop trying and tell the user.
+        // Mic permission denied — stop trying and tell the user (once).
         wantListenRef.current = false;
         setIsListening(false);
+        setMicBlocked(true);
         latestRef.current.addMessage?.('agent', AGENT.micNeeded(latestRef.current.language));
         return;
       }
@@ -293,7 +295,7 @@ export function AIAgentProvider({ children }) {
     try {
       rec.start();
       setIsListening(true);
-      soundEffects.playMicBeep?.();
+      // No beep on auto-restart — it fires on every silence gap and feels like toggling.
     } catch (e) {
       // Already started — that's fine, we're already listening.
     }
@@ -491,7 +493,7 @@ export function AIAgentProvider({ children }) {
       setTimeout(() => {
         const newOrder = placeOrder({
           orderType: 'delivery',
-          deliveryAddress: customerInfo.address || 'नयाँ बानेश्वर, काठमाडौं',
+          deliveryAddress: customerInfo.address || customerInfo.name || '',
           items: orderItems,
           itemsSubtotal: pending.subtotal,
           deliveryCharge: pending.deliveryCharge,
@@ -561,6 +563,7 @@ export function AIAgentProvider({ children }) {
     setIsAgentActive(true);
     activeRef.current = true;
     wantListenRef.current = true;
+    setMicBlocked(false);
     setIsAgentPanelOpen(true);
     setAgentState('GREETING');
     setAgentMessages([]);
@@ -617,6 +620,7 @@ export function AIAgentProvider({ children }) {
       agentState,
       isListening,
       isSpeaking,
+      micBlocked,
       transcript,
       agentMessages,
       pendingOrderData,

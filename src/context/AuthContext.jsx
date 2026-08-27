@@ -87,7 +87,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Register a new account. `identifier` is phone or email.
-  const register = useCallback(({ name, identifier, password, role = 'customer', address = '' }) => {
+  const register = useCallback(({ name, identifier, password, role = 'customer', address = '', shopName = '', shopType = 'grocery', shopTypeLabel = '', lat = null, lng = null }) => {
     const cleanName = (name || '').trim();
     const cleanId = (identifier || '').trim();
 
@@ -122,9 +122,13 @@ export function AuthProvider({ children }) {
       phone,
       email,
       passwordHash: hashPassword(password),
-      address: address || (role === 'customer' ? 'नयाँ बानेश्वर, काठमाडौं' : ''),
-      lat: 27.693,
-      lng: 85.338,
+      address: address || '',
+      lat: lat != null ? lat : null,
+      lng: lng != null ? lng : null,
+      // Shopkeepers own a shop of a chosen type (created on first login).
+      shopName: role === 'shopkeeper' ? (shopName || '').trim() : undefined,
+      shopType: role === 'shopkeeper' ? (shopType || 'grocery') : undefined,
+      shopTypeLabel: role === 'shopkeeper' ? (shopTypeLabel || '').trim() : undefined,
       createdAt: new Date().toISOString()
     };
 

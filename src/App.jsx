@@ -1,13 +1,16 @@
 import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { WalletProvider } from './context/WalletContext';
 import { AppProvider, useApp } from './context/AppContext';
 import { ShopkeeperProvider } from './context/ShopkeeperContext';
 import { AIAgentProvider } from './context/AIAgentContext';
+import { ShopAgentProvider } from './context/ShopAgentContext';
 import AuthScreen from './components/auth/AuthScreen';
 import RoleSelectModal from './components/entry/RoleSelectModal';
 import Navbar from './components/common/Navbar';
 import NotificationToast from './components/common/NotificationToast';
 import AIAgentOverlay from './components/common/AIAgentOverlay';
+import ShopAgentOverlay from './components/shopkeeper/ShopAgentOverlay';
 import CustomerHome from './components/customer/CustomerHome';
 import ShopkeeperHome from './components/shopkeeper/ShopkeeperHome';
 
@@ -36,6 +39,9 @@ function MainAppContent() {
 
         {/* Persistent hands-free AI Agent — only for logged-in customers */}
         {isAuthenticated && role === 'customer' && <AIAgentOverlay />}
+
+        {/* Shopkeeper voice assistant — manage inventory by voice */}
+        {isAuthenticated && role === 'shopkeeper' && <ShopAgentOverlay />}
       </div>
     </div>
   );
@@ -44,13 +50,17 @@ function MainAppContent() {
 export default function App() {
   return (
     <AuthProvider>
+      <WalletProvider>
       <AppProvider>
         <ShopkeeperProvider>
           <AIAgentProvider>
-            <MainAppContent />
+            <ShopAgentProvider>
+              <MainAppContent />
+            </ShopAgentProvider>
           </AIAgentProvider>
         </ShopkeeperProvider>
       </AppProvider>
+      </WalletProvider>
     </AuthProvider>
   );
 }

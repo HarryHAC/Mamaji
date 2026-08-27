@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { toDevanagariNumerals } from '../../utils/deliveryCalculator';
 import { pick } from '../../utils/i18n';
+import LiveDeliveryTracker from './LiveDeliveryTracker';
 import {
   X,
   CheckCircle2,
@@ -121,6 +122,11 @@ export default function OrderTrackingModal() {
                 );
               })}
             </div>
+          )}
+
+          {/* Live delivery tracking (active delivery orders) */}
+          {order.orderType === 'delivery' && !isDelivered && !isRejected && (
+            <LiveDeliveryTracker order={order} shop={shop} language={language} />
           )}
 
           {/* Delivery Rider Dispatch Notice (Section 18) */}

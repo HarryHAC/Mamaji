@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import LanguagePicker from '../common/LanguagePicker';
-import { ShoppingBag, Store, Phone, Mail, Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { SHOP_TYPE_LIST } from '../../constants/shopTypes';
+import { pick } from '../../utils/i18n';
+import { getCurrentLocation } from '../../utils/geo';
+import { ShoppingBag, Store, Phone, Mail, Lock, User, ArrowRight, Eye, EyeOff, LocateFixed, CheckCircle2 } from 'lucide-react';
 
 export default function AuthScreen() {
   const { login, register } = useAuth();
@@ -13,9 +16,21 @@ export default function AuthScreen() {
   const [name, setName] = useState('');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [shopName, setShopName] = useState('');
+  const [shopType, setShopType] = useState('grocery');
+  const [customType, setCustomType] = useState('');
+  const [shopLoc, setShopLoc] = useState(null); // {lat, lng}
+  const [locBusy, setLocBusy] = useState(false);
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+
+  const captureLocation = async () => {
+    setLocBusy(true);
+    try { setShopLoc(await getCurrentLocation()); }
+    catch (e) { setError(pick(language, { ne: 'लोकेशन अनुमति दिनुहोस्।', en: 'Please allow location access.', mai: 'लोकेशन अनुमति दिअ\'।', bho: 'लोकेशन अनुमति दीं।' })); }
+    finally { setLocBusy(false); }
+  };
 
   const ne = language === 'ne' || language === 'mai' || language === 'bho';
   const L = (nep, eng) => (ne ? nep : eng);
@@ -26,7 +41,7 @@ export default function AuthScreen() {
     setBusy(true);
     const res = mode === 'login'
       ? login({ identifier, password })
-      : register({ name, identifier, password, role });
+      : register({ name, identifier, password, role, shopName, shopType, shopTypeLabel: shopType === 'other' ? customType.trim() : '', lat: shopLoc?.lat ?? null, lng: shopLoc?.lng ?? null });
     setBusy(false);
     if (!res.success) setError(res.error);
     // On success, AuthProvider sets currentUser → App re-renders into the app.
@@ -105,6 +120,65 @@ export default function AuthScreen() {
                 autoComplete="name"
               />
             </div>
+          )}
+
+          {/* Shop details (register as shop owner) */}
+          {mode === 'register' && role === 'shopkeeper' && (
+            <>
+              <div className="auth-field">
+                <Store size={18} className="auth-field-icon" />
+                <input
+                  type="text"
+                  className="auth-input"
+                  placeholder={L('पसलको नाम (जस्तै: राम किराना)', 'Shop name (e.g. Ram Kirana)')}
+                  value={shopName}
+                  onChange={(e) => setShopName(e.target.value)}
+                />
+              </div>
+              <div className="auth-shoptype-label">{L('पसलको प्रकार छान्नुहोस्', 'Choose your shop type')}</div>
+              <div className="auth-shoptype-grid">
+                {SHOP_TYPE_LIST.map(tp => (
+                  <button
+                    key={tp.id}
+                    type="button"
+                    className={`auth-shoptype-btn ${shopType === tp.id ? 'selected' : ''}`}
+                    onClick={() => setShopType(tp.id)}
+                  >
+                    <span className="st-icon">{tp.icon}</span>
+                    <span className="st-name">{pick(language, tp.name)}</span>
+                  </button>
+                ))}
+                {/* Custom / other shop type */}
+                <button
+                  type="button"
+                  className={`auth-shoptype-btn ${shopType === 'other' ? 'selected' : ''}`}
+                  onClick={() => setShopType('other')}
+                >
+                  <span className="st-icon">➕</span>
+                  <span className="st-name">{L('अन्य', 'Other')}</span>
+                </button>
+              </div>
+              {shopType === 'other' && (
+                <div className="auth-field">
+                  <Store size={18} className="auth-field-icon" />
+                  <input
+                    type="text"
+                    className="auth-input"
+                    placeholder={L('पसलको प्रकार लेख्नुहोस् (जस्तै: फुल पसल)', 'Type your shop type (e.g. Flower shop)')}
+                    value={customType}
+                    onChange={(e) => setCustomType(e.target.value)}
+                  />
+                </div>
+              )}
+              <button type="button" className={`auth-loc-btn ${shopLoc ? 'done' : ''}`} onClick={captureLocation} disabled={locBusy}>
+                {shopLoc ? <CheckCircle2 size={16} /> : <LocateFixed size={16} />}
+                <span>{locBusy
+                  ? L('लिँदैछ...', 'Getting...')
+                  : shopLoc
+                    ? L('पसलको स्थान लिइयो ✓', 'Shop location captured ✓')
+                    : L('📍 पसलको स्थान लिनुहोस् (नजिकका ग्राहकलाई देखाउन)', '📍 Set shop location (to reach nearby customers)')}</span>
+              </button>
+            </>
           )}
 
           <div className="auth-field">

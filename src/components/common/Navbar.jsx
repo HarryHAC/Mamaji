@@ -3,13 +3,15 @@ import { useApp } from '../../context/AppContext';
 import { useShopkeeper } from '../../context/ShopkeeperContext';
 import { useAuth } from '../../context/AuthContext';
 import LanguagePicker from './LanguagePicker';
-import { ShoppingBag, Store, User, RotateCcw, Clock, LogOut, Activity, Phone, Mail } from 'lucide-react';
+import { ShoppingBag, Store, Clock, LogOut, Activity, Phone, Mail, Wallet } from 'lucide-react';
+import WalletModal from '../wallet/WalletModal';
 
 export default function Navbar() {
-  const { role, setRole, cart, setIsCartOpen, myOrders, setActiveTrackingOrderId, language, t } = useApp();
+  const { role, cart, setIsCartOpen, myOrders, setActiveTrackingOrderId, language, t } = useApp();
   const { shopOrders } = useShopkeeper();
   const { currentUser, logout, getActivity } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [walletOpen, setWalletOpen] = useState(false);
 
   const ne = language === 'ne' || language === 'mai' || language === 'bho';
   const activity = currentUser ? getActivity(currentUser.id).slice(0, 6) : [];
@@ -36,7 +38,7 @@ export default function Navbar() {
     <header className="app-navbar">
       <div className="navbar-container">
         {/* Left: Brand */}
-        <div className="navbar-brand" onClick={() => setRole('entry')}>
+        <div className="navbar-brand">
           <div className="brand-logo-small">
             <span>🏬</span>
           </div>
@@ -52,6 +54,17 @@ export default function Navbar() {
         <div className="navbar-actions">
           {/* Language Switcher */}
           <LanguagePicker compact={true} />
+
+          {/* Wallet */}
+          <button
+            type="button"
+            className="nav-wallet-btn"
+            onClick={() => setWalletOpen(true)}
+            aria-label="Wallet"
+            title="Wallet"
+          >
+            <Wallet size={20} />
+          </button>
 
           {/* Customer Specific Controls */}
           {role === 'customer' && (
@@ -150,16 +163,6 @@ export default function Navbar() {
                     )}
                   </div>
 
-                  {/* Demo role switch */}
-                  <button
-                    type="button"
-                    className="profile-dd-btn switch"
-                    onClick={() => { setRole(role === 'customer' ? 'shopkeeper' : 'customer'); setMenuOpen(false); }}
-                  >
-                    <RotateCcw size={16} />
-                    <span>{role === 'customer' ? (ne ? 'पसले मोडमा जानुहोस्' : 'Switch to Shop Owner') : (ne ? 'ग्राहक मोडमा जानुहोस्' : 'Switch to Customer')}</span>
-                  </button>
-
                   <button
                     type="button"
                     className="profile-dd-btn logout"
@@ -174,6 +177,8 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      <WalletModal open={walletOpen} onClose={() => setWalletOpen(false)} />
     </header>
   );
 }

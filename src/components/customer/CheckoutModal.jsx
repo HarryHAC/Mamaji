@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { useWallet } from '../../context/WalletContext';
 import { calculateDeliveryFee, toDevanagariNumerals } from '../../utils/deliveryCalculator';
 import { pick } from '../../utils/i18n';
+import { getCurrentLocation } from '../../utils/geo';
 import confetti from 'canvas-confetti';
 import {
   X,
@@ -15,7 +17,9 @@ import {
   Truck,
   Store,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Wallet,
+  LocateFixed
 } from 'lucide-react';
 
 export default function CheckoutModal() {
@@ -27,14 +31,16 @@ export default function CheckoutModal() {
     customerInfo,
     setCustomerInfo,
     placeOrder,
+    showToast,
     language,
     t
   } = useApp();
+  const { balance: walletBalance, pay: walletPay } = useWallet();
 
   const [orderType, setOrderType] = useState('delivery'); // 'delivery' | 'pickup'
-  const [deliveryAddress, setDeliveryAddress] = useState(customerInfo.address || 'नयाँ बानेश्वर, काठमाडौं');
-  const [customerName, setCustomerName] = useState(customerInfo.name || 'दिनेश अधिकारी');
-  const [customerPhone, setCustomerPhone] = useState(customerInfo.phone || '९८४१००२२३३');
+  const [deliveryAddress, setDeliveryAddress] = useState(customerInfo.address || '');
+  const [customerName, setCustomerName] = useState(customerInfo.name || '');
+  const [customerPhone, setCustomerPhone] = useState(customerInfo.phone || '');
   const [customerNote, setCustomerNote] = useState('');
   
   // Location privacy state
@@ -46,6 +52,20 @@ export default function CheckoutModal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Simulated online payment gateway: 'idle' | 'processing' | 'success'
   const [paymentStage, setPaymentStage] = useState('idle');
+  const [locBusy, setLocBusy] = useState(false);
+
+  const handleUseMyLocation = async () => {
+    setLocBusy(true);
+    try {
+      const loc = await getCurrentLocation();
+      setHasLocationPermission(true);
+      setCustomerInfo(prev => ({ ...prev, lat: loc.lat, lng: loc.lng, hasLocationPermission: true }));
+    } catch (e) {
+      showToast(pick(language, { ne: 'लोकेशन पाउन सकिएन', en: 'Could not get location', mai: 'लोकेशन नै भेटल', bho: 'लोकेशन ना मिलल' }), 'error');
+    } finally {
+      setLocBusy(false);
+    }
+  };
 
   if (!isCheckoutOpen) return null;
 
@@ -64,7 +84,8 @@ export default function CheckoutModal() {
     setShowLocationDialog(false);
   };
 
-  const isOnlinePayment = paymentMethod !== 'cod';
+  const isWallet = paymentMethod === 'wallet';
+  const isOnlinePayment = paymentMethod === 'esewa' || paymentMethod === 'khalti' || paymentMethod === 'bankTransfer';
 
   // Actually place the order and close the modal.
   const completeOrder = () => {
@@ -94,6 +115,25 @@ export default function CheckoutModal() {
     // If delivery is selected and location permission hasn't been asked yet, ask now
     if (orderType === 'delivery' && !hasLocationPermission && !showLocationDialog) {
       setShowLocationDialog(true);
+      return;
+    }
+
+    // Pay from the in-app wallet (no third party) — money moves to the shop owner.
+    if (isWallet) {
+      if (walletBalance < grandTotal) {
+        showToast(pick(language, {
+          ne: 'वालेटमा पर्याप्त ब्यालेन्स छैन', en: 'Not enough wallet balance', mai: 'वालेटमे बैलेंस कम', bho: 'वालेट में बैलेंस कम'
+        }), 'error');
+        return;
+      }
+      setIsSubmitting(true);
+      const r = walletPay(grandTotal, selectedShop?.ownerId, pick(language, { ne: 'अर्डर भुक्तानी', en: 'Order payment', mai: 'अर्डर भुगतान', bho: 'आर्डर भुगतान' }));
+      if (!r.success) {
+        setIsSubmitting(false);
+        showToast(pick(language, { ne: 'भुक्तानी असफल', en: 'Payment failed', mai: 'भुगतान असफल', bho: 'भुगतान असफल' }), 'error');
+        return;
+      }
+      setTimeout(completeOrder, 500);
       return;
     }
 
@@ -198,6 +238,14 @@ export default function CheckoutModal() {
                   value={deliveryAddress}
                   onChange={(e) => setDeliveryAddress(e.target.value)}
                 />
+                <button type="button" className="checkout-loc-btn" onClick={handleUseMyLocation} disabled={locBusy}>
+                  <LocateFixed size={14} />
+                  <span>{locBusy
+                    ? pick(language, { ne: 'लोकेशन लिँदैछ...', en: 'Getting location...', mai: 'लोकेशन लैत...', bho: 'लोकेशन लेत...' })
+                    : hasLocationPermission && customerInfo.lat
+                      ? pick(language, { ne: '📍 लोकेशन सेयर गरियो ✓', en: '📍 Location shared ✓', mai: '📍 लोकेशन सेयर भेल ✓', bho: '📍 लोकेशन सेयर भइल ✓' })
+                      : pick(language, { ne: '📍 मेरो लाइभ लोकेशन प्रयोग गर्नुहोस्', en: '📍 Use my live location', mai: '📍 हमर लाइव लोकेशन', bho: '📍 हमार लाइव लोकेशन' })}</span>
+                </button>
               </div>
             )}
 
@@ -262,6 +310,26 @@ export default function CheckoutModal() {
             <p className="payment-note">{t.payNote}</p>
 
             <div className="payment-methods-grid">
+              {/* Mama Ji Wallet */}
+              <label className={`payment-option-card ${paymentMethod === 'wallet' ? 'selected' : ''}`}>
+                <input
+                  type="radio"
+                  name="payment"
+                  value="wallet"
+                  checked={paymentMethod === 'wallet'}
+                  onChange={() => setPaymentMethod('wallet')}
+                />
+                <div className="pay-icon-box wallet">
+                  <Wallet size={24} />
+                </div>
+                <div className="pay-details">
+                  <span className="pay-title">{pick(language, { ne: 'मामा जी वालेट', en: 'Mama Ji Wallet', mai: 'मामा जी वालेट', bho: 'मामा जी वालेट' })}</span>
+                  <span className="pay-desc">{pick(language, {
+                    ne: `ब्यालेन्स: रु ${toDevanagariNumerals(walletBalance)}`, en: `Balance: NPR ${walletBalance}`, mai: `बैलेंस: रु ${toDevanagariNumerals(walletBalance)}`, bho: `बैलेंस: रु ${toDevanagariNumerals(walletBalance)}`
+                  })}</span>
+                </div>
+              </label>
+
               {/* Cash on Delivery */}
               <label className={`payment-option-card ${paymentMethod === 'cod' ? 'selected' : ''}`}>
                 <input

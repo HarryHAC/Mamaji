@@ -20,29 +20,38 @@ import {
 } from 'lucide-react';
 
 export default function ShopkeeperHome() {
-  const { activeShopId, setActiveShopId, shopData, shopOrders, lowStockProducts } = useShopkeeper();
-  const { shops, t, language } = useApp();
+  const { shopData, shopOrders, lowStockProducts } = useShopkeeper();
+  const { t, language } = useApp();
 
   // Tab: 'dashboard' | 'orders' | 'inventory' | 'khata' | 'settings'
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [showShopDropdown, setShowShopDropdown] = useState(false);
 
   const pendingOrdersCount = shopOrders.filter(
     o => o.orderStatus === 'received' || o.orderStatus === 'accepted' || o.orderStatus === 'preparing'
   ).length;
 
+  if (!shopData) {
+    return (
+      <div className="shopkeeper-layout">
+        <div className="empty-state-box">
+          <div className="empty-state-icon">🏪</div>
+          <h3>{pick(language, { ne: 'पसल तयार हुँदैछ...', en: 'Setting up your shop...', mai: 'दोकान तैयार भऽ रहल...', bho: 'दोकान तैयार होत बा...' })}</h3>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="shopkeeper-layout">
-      {/* Top Shop Selector Bar for multi-store owners */}
+      {/* Top Shop Bar */}
       <div className="shopkeeper-top-bar">
-        <div className="current-shop-indicator" onClick={() => setShowShopDropdown(!showShopDropdown)}>
+        <div className="current-shop-indicator">
           <div className="shop-icon-circle">
             <Store size={18} />
           </div>
           <div>
             <div className="shop-title-wrap">
               <h2 className="shop-active-name">{shopData.name}</h2>
-              <ChevronDown size={14} className={showShopDropdown ? 'rotated' : ''} />
             </div>
             <span className="shop-active-location">{shopData.address}</span>
           </div>
@@ -73,32 +82,11 @@ export default function ShopkeeperHome() {
               className="quick-stat-badge stock"
               onClick={() => setActiveTab('inventory')}
             >
-              ⚠️ {lowStockProducts.length} कम स्टक
+              ⚠️ {lowStockProducts.length} {pick(language, { ne: 'कम स्टक', en: 'low stock', mai: 'कम स्टक', bho: 'कम स्टॉक' })}
             </button>
           )}
         </div>
       </div>
-
-      {/* Switch Shop Dropdown for Demo */}
-      {showShopDropdown && (
-        <div className="shopkeeper-stores-dropdown">
-          <p className="dropdown-label">पसल छान्नुहोस् (Multi-Tenant Demo):</p>
-          {shops.map(s => (
-            <button
-              key={s.id}
-              type="button"
-              className={`shop-select-option ${s.id === activeShopId ? 'selected' : ''}`}
-              onClick={() => {
-                setActiveShopId(s.id);
-                setShowShopDropdown(false);
-              }}
-            >
-              <Store size={16} />
-              <span>{s.name} ({s.address})</span>
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Top Navigation Tabs for Shopkeeper */}
       <nav className="shopkeeper-nav-tabs">

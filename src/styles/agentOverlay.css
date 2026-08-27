@@ -9,21 +9,24 @@
   /* Fixed to the viewport so the assistant is ALWAYS reachable, even on a long
      scrolling page. On desktop it hugs the 480px mobile frame's right edge. */
   position: fixed;
-  right: max(16px, calc(50% - 224px));
-  bottom: 92px;
+  right: max(14px, calc(50% - 226px));
+  bottom: 92px;                 /* clears the customer bottom nav */
   z-index: 120;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 10px;
+  gap: 8px;
   pointer-events: none;
 }
 .ai-agent-fab-container > * { pointer-events: auto; }
 
+/* Shopkeeper dashboard has no bottom nav — sit lower and out of the way. */
+.shop-agent-fab-container { bottom: 22px; }
+
 .ai-agent-fab {
   position: relative;
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: var(--radius-full);
   border: none;
   cursor: pointer;
@@ -104,13 +107,15 @@
 .agent-activate-label {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
+  max-width: 150px;
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff;
   border-radius: var(--radius-full);
-  padding: 9px 15px;
-  font-size: 13px;
-  font-weight: 800;
+  padding: 7px 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.15;
   box-shadow: var(--shadow-float);
   cursor: pointer;
   animation: labelBob 2.5s ease-in-out infinite;
@@ -137,8 +142,11 @@
 .agent-panel {
   width: 100%;
   max-width: 480px;
-  height: 86vh;
-  max-height: 720px;
+  /* dvh = the *visible* viewport on mobile (accounts for the browser URL bar),
+     so the footer with the mic button is never pushed off-screen on Android. */
+  height: 85vh;
+  height: 85dvh;
+  max-height: 640px;
   background: var(--bg-app);
   border-radius: 24px 24px 0 0;
   display: flex;
@@ -232,7 +240,8 @@
 /* ── Footer / controls ── */
 .agent-panel-footer {
   flex-shrink: 0;
-  padding: 12px 14px 16px;
+  padding: 12px 14px;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
   background: var(--bg-card);
   border-top: 1px solid var(--border-color);
 }

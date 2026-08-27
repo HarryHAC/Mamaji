@@ -26,6 +26,7 @@ export default function AIAgentOverlay() {
     agentState,
     isListening,
     isSpeaking,
+    micBlocked,
     transcript,
     agentMessages,
     toggleAgent,
@@ -34,6 +35,11 @@ export default function AIAgentOverlay() {
     processUserInput
   } = useAIAgent();
   const { t, language } = useApp();
+
+  // Stable "listening" indicator: while the assistant is active and not
+  // speaking (and the mic isn't blocked) we show a steady listening state,
+  // so the raw recognition start/stop churn never flickers the UI on/off.
+  const listeningDisplay = isAgentActive && !isSpeaking && !micBlocked;
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -56,6 +62,7 @@ export default function AIAgentOverlay() {
     GREETING: pick(language, { ne: 'तयार छ — बोल्नुहोस्', en: 'Ready — Speak', mai: 'तैयार — बाजू', bho: 'तैयार — बोलीं' }),
     SPEAKING: pick(language, { ne: '🔊 बोल्दैछ...', en: '🔊 Speaking...', mai: '🔊 बाजि रहल...', bho: '🔊 बोलत बा...' }),
     LISTENING: pick(language, { ne: '🎤 सुन्दैछ...', en: '🎤 Listening...', mai: '🎤 सुनि रहल...', bho: '🎤 सुनत बा...' }),
+    TAP_MIC: pick(language, { ne: '🎤 माइक थिच्नुहोस्', en: '🎤 Tap the mic', mai: '🎤 माइक थिचू', bho: '🎤 माइक दबाईं' }),
     PROCESSING: pick(language, { ne: 'बुझ्दैछ...', en: 'Processing...', mai: 'बुझि रहल...', bho: 'समझत बा...' }),
     CHECKOUT_PREP: pick(language, { ne: 'अर्डर तयार...', en: 'Preparing...', mai: 'अर्डर तैयार...', bho: 'आर्डर तैयार...' }),
     CONFIRMING: pick(language, { ne: 'पुष्टि चाहिन्छ', en: 'Confirm?', mai: 'पक्का करू?', bho: 'पक्का करीं?' }),
@@ -71,7 +78,7 @@ export default function AIAgentOverlay() {
       <div className="ai-agent-fab-container">
         <button
           type="button"
-          className={`ai-agent-fab ${isAgentActive ? 'active' : ''} ${isListening ? 'listening' : ''}`}
+          className={`ai-agent-fab ${isAgentActive ? 'active' : ''} ${listeningDisplay ? 'listening' : ''}`}
           onClick={() => {
             if (!isAgentActive) {
               toggleAgent();
@@ -81,10 +88,10 @@ export default function AIAgentOverlay() {
           }}
           aria-label="AI Assistant"
         >
-          {isListening && <div className="fab-ripple-ring"></div>}
+          {listeningDisplay && <div className="fab-ripple-ring"></div>}
           <div className="fab-icon-inner">
             {isAgentActive ? (
-              isListening ? <Mic size={28} className="mic-pulse" /> : <Bot size={28} />
+              listeningDisplay ? <Mic size={28} className="mic-pulse" /> : <Bot size={28} />
             ) : (
               <Headphones size={28} />
             )}
@@ -94,26 +101,19 @@ export default function AIAgentOverlay() {
         {/* Status Pill */}
         {isAgentActive && (
           <div className="agent-status-pill" onClick={() => setIsAgentPanelOpen(!isAgentPanelOpen)}>
-            <span className={`status-dot ${isListening ? 'listening' : 'ready'}`}></span>
+            <span className={`status-dot ${listeningDisplay ? 'listening' : 'ready'}`}></span>
             <span className="status-text">
               {isSpeaking
                 ? stateLabels.SPEAKING
-                : isListening
-                  ? stateLabels.LISTENING
-                  : stateLabels[agentState] || stateLabels.GREETING}
+                : micBlocked
+                  ? stateLabels.TAP_MIC
+                  : listeningDisplay
+                    ? stateLabels.LISTENING
+                    : stateLabels[agentState] || stateLabels.GREETING}
             </span>
           </div>
         )}
 
-        {/* Inactive label */}
-        {!isAgentActive && (
-          <div className="agent-activate-label" onClick={toggleAgent}>
-            <Sparkles size={14} />
-            <span>
-              {pick(language, { ne: 'एआई सहायक सुरु गर्नुहोस्', en: 'Start AI Assistant', mai: 'एआई सहायक सुरु करू', bho: 'एआई सहायक सुरू करीं' })}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* ── Agent Conversation Panel ── */}
@@ -130,12 +130,14 @@ export default function AIAgentOverlay() {
                   <h3 className="agent-title">
                     {pick(language, { ne: 'मामा जी एआई सहायक', en: 'Mama Ji AI Assistant', mai: 'मामा जी एआई सहायक', bho: 'मामा जी एआई सहायक' })}
                   </h3>
-                  <span className={`agent-state-badge ${isSpeaking ? 'speaking' : isListening ? 'listening' : agentState.toLowerCase()}`}>
+                  <span className={`agent-state-badge ${isSpeaking ? 'speaking' : listeningDisplay ? 'listening' : agentState.toLowerCase()}`}>
                     {isSpeaking
                       ? stateLabels.SPEAKING
-                      : isListening
-                        ? stateLabels.LISTENING
-                        : stateLabels[agentState] || stateLabels.GREETING}
+                      : micBlocked
+                        ? stateLabels.TAP_MIC
+                        : listeningDisplay
+                          ? stateLabels.LISTENING
+                          : stateLabels[agentState] || stateLabels.GREETING}
                   </span>
                 </div>
               </div>
@@ -231,16 +233,16 @@ export default function AIAgentOverlay() {
               <div className="agent-mic-row">
                 <button
                   type="button"
-                  className={`agent-mic-btn ${isListening ? 'active' : ''}`}
+                  className={`agent-mic-btn ${listeningDisplay ? 'active' : ''}`}
                   onClick={() => {
-                    if (isListening) {
+                    if (listeningDisplay) {
                       stopListening();
                     } else {
                       startListening();
                     }
                   }}
                 >
-                  {isListening ? (
+                  {listeningDisplay ? (
                     <>
                       <StopCircle size={20} />
                       <span>{pick(language, { ne: 'रोक्नुहोस्', en: 'Stop', mai: 'रोकू', bho: 'रोकीं' })}</span>

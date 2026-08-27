@@ -76,7 +76,7 @@ export default function InventoryManager() {
     setEditingProductId(null);
     setNameNe('');
     setNameEn('');
-    setCategory('staples');
+    setCategory(firstCategoryId);
     setPrice('');
     setUnit('kg');
     setStock('20');
@@ -269,7 +269,7 @@ export default function InventoryManager() {
         >
           {CATEGORIES.map(c => (
             <option key={c.id} value={c.id}>
-              {c.nameNe}
+              {pick(language, c.name)}
             </option>
           ))}
         </select>
@@ -432,7 +432,7 @@ export default function InventoryManager() {
                   >
                     {CATEGORIES.filter(c => c.id !== 'all').map(c => (
                       <option key={c.id} value={c.id}>
-                        {c.nameNe} ({c.nameEn})
+                        {pick(language, c.name)}
                       </option>
                     ))}
                   </select>

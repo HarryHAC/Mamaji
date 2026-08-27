@@ -92,11 +92,13 @@ export const ALL_CATEGORY = C('all', '🛍️', 'सबै सामान', 'Al
 export function getShopCategories(shopOrType) {
   const type = typeof shopOrType === 'string'
     ? shopOrType
-    : (shopOrType && shopOrType.shopType) || 'grocery';
-  const def = SHOP_TYPES[type] || SHOP_TYPES.grocery;
+    : (shopOrType && shopOrType.shopType) || 'general';
+  const def = SHOP_TYPES[type] || SHOP_TYPES.general; // custom/other → general categories
   return [ALL_CATEGORY, ...def.categories];
 }
 
 export function getShopTypeMeta(type) {
-  return SHOP_TYPES[type] || SHOP_TYPES.grocery;
+  if (SHOP_TYPES[type]) return SHOP_TYPES[type];
+  // Custom / "other" shop type.
+  return { id: type || 'other', icon: '🏬', name: { ne: 'अन्य पसल', en: 'Other Shop', mai: 'अन्य दोकान', bho: 'अन्य दोकान' } };
 }

@@ -6,6 +6,7 @@ import CustomerOrders from './CustomerOrders';
 import CartDrawer from './CartDrawer';
 import CheckoutModal from './CheckoutModal';
 import OrderTrackingModal from './OrderTrackingModal';
+import { pick } from '../../utils/i18n';
 import {
   Home,
   ShoppingBag,
@@ -18,46 +19,55 @@ import {
 export default function CustomerHome() {
   const {
     selectedShop,
+    shops,
     cart,
     setIsCartOpen,
+    language,
     t
   } = useApp();
 
   // Tab: 'home' | 'shops' | 'orders'
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState(selectedShop ? 'home' : 'shops');
   const [showShopPicker, setShowShopPicker] = useState(false);
+
+  // If there's no shop to browse, keep the customer on the shops tab.
+  React.useEffect(() => {
+    if (!selectedShop && activeTab === 'home') setActiveTab('shops');
+  }, [selectedShop, activeTab]);
 
   const totalCartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
     <div className="customer-home-layout">
       {/* Active Shop Top Banner */}
-      <div className="active-shop-bar">
-        <div className="shop-info-touch" onClick={() => setShowShopPicker(!showShopPicker)}>
-          <div className="shop-avatar">
-            <Store size={20} />
-          </div>
-          <div className="shop-text-meta">
-            <div className="shop-title-arrow">
-              <h2 className="current-shop-name">{selectedShop.name}</h2>
-              <ChevronDown size={16} className={`arrow-icon ${showShopPicker ? 'open' : ''}`} />
+      {selectedShop && (
+        <div className="active-shop-bar">
+          <div className="shop-info-touch" onClick={() => setShowShopPicker(!showShopPicker)}>
+            <div className="shop-avatar">
+              <Store size={20} />
             </div>
-            <p className="current-shop-sub">
-              <MapPin size={12} /> {selectedShop.address} • {selectedShop.distanceKm} {t.km}
-            </p>
+            <div className="shop-text-meta">
+              <div className="shop-title-arrow">
+                <h2 className="current-shop-name">{selectedShop.name}</h2>
+                <ChevronDown size={16} className={`arrow-icon ${showShopPicker ? 'open' : ''}`} />
+              </div>
+              <p className="current-shop-sub">
+                <MapPin size={12} /> {selectedShop.address} • {selectedShop.distanceKm} {t.km}
+              </p>
+            </div>
           </div>
+          <button
+            type="button"
+            className="btn-change-shop-pill"
+            onClick={() => setShowShopPicker(!showShopPicker)}
+          >
+            {showShopPicker ? (pick(language, { ne: 'बन्द गर्नुहोस्', en: 'Close', mai: 'बन्द करू', bho: 'बंद करीं' })) : t.changeShop}
+          </button>
         </div>
-        <button
-          type="button"
-          className="btn-change-shop-pill"
-          onClick={() => setShowShopPicker(!showShopPicker)}
-        >
-          {showShopPicker ? 'बन्द गर्नुहोस्' : t.changeShop}
-        </button>
-      </div>
+      )}
 
       {/* Expandable Nearby Shops List */}
-      {showShopPicker && (
+      {selectedShop && showShopPicker && (
         <div className="shop-picker-dropdown">
           <ShopList />
         </div>

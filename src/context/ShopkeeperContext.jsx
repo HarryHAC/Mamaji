@@ -1,15 +1,75 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useApp } from './AppContext';
+import { useAuth } from './AuthContext';
 import { INITIAL_PRODUCTS, INITIAL_EXPENSES, GENERIC_PRODUCT_IMAGES } from '../constants/sampleData';
 import { soundEffects } from '../utils/audioAlerts';
 
 const ShopkeeperContext = createContext();
 
+// Build a fresh shop for a shop owner from their account details.
+function makeShopForOwner(user) {
+  return {
+    id: `shop-${user.id}`,
+    shopType: user.shopType || 'grocery',
+    shopTypeLabel: user.shopTypeLabel || '',
+    ownerId: user.id,
+    name: user.shopName || `${user.name} पसल`,
+    nameEn: user.shopName || `${user.name} Store`,
+    ownerName: user.name,
+    phone: user.phone || '',
+    address: user.address || '',
+    addressEn: user.address || '',
+    lat: user.lat,
+    lng: user.lng,
+    distanceKm: 0.5,
+    rating: 5.0,
+    reviewCount: 0,
+    isOpen: true,
+    openingTime: '07:00',
+    closingTime: '21:00',
+    deliveryAvailable: true,
+    deliveryStartTime: '08:00',
+    deliveryEndTime: '20:00',
+    maxDeliveryDistanceKm: 6,
+    minOrderAmount: 50,
+    deliveryModel: 'basePlusKm',
+    baseDeliveryCharge: 25,
+    perKmCharge: 15,
+    deliverySlabs: [{ maxKm: 1, charge: 20 }, { maxKm: 3, charge: 40 }, { maxKm: 5, charge: 70 }],
+    deliveryPersons: [user.name],
+    paymentSettings: {
+      codEnabled: true,
+      esewaEnabled: true, esewaId: user.phone || '',
+      khaltiEnabled: true, khaltiId: user.phone || '',
+      bankTransferEnabled: false, bankName: '', bankAccountHolder: user.name, bankAccountNumber: '', qrImage: ''
+    },
+    image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=500&auto=format&fit=crop&q=80'
+  };
+}
+
 export function ShopkeeperProvider({ children }) {
   const { shops, setShops, orders, setOrders, showToast, t } = useApp();
+  const { currentUser } = useAuth();
 
-  // Active managed shop by the shopkeeper (defaults to Shop-1 "राम किराना पसल")
-  const [activeShopId, setActiveShopId] = useState('shop-1');
+  // The shop the owner manages (their own; no demo shops any more).
+  const [activeShopId, setActiveShopId] = useState(null);
+
+  // Ensure every shop-owner account has exactly one shop, and manage that shop.
+  const shopEnsuredRef = useRef(null);
+  useEffect(() => {
+    if (!currentUser || currentUser.role !== 'shopkeeper') return;
+    const ownShopId = `shop-${currentUser.id}`;
+    const existing = shops.find(s => s.id === ownShopId || s.ownerId === currentUser.id);
+    if (existing) {
+      if (activeShopId !== existing.id) setActiveShopId(existing.id);
+    } else if (shopEnsuredRef.current !== currentUser.id) {
+      shopEnsuredRef.current = currentUser.id;
+      const newShop = makeShopForOwner(currentUser);
+      setShops(prev => prev.some(s => s.id === newShop.id) ? prev : [...prev, newShop]);
+      setActiveShopId(newShop.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, shops]);
 
   // Shop Products Inventory
   const [products, setProducts] = useState(() => {
@@ -24,7 +84,10 @@ export function ShopkeeperProvider({ children }) {
   });
 
   // Current Shop Data
-  const shopData = shops.find(s => s.id === activeShopId) || shops[0];
+  // The owner only ever manages their own shop.
+  const shopData = shops.find(s => s.id === activeShopId)
+    || (currentUser ? shops.find(s => s.ownerId === currentUser.id) : null)
+    || null;
 
   // Persist products and expenses
   useEffect(() => {

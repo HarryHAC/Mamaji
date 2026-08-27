@@ -30,8 +30,9 @@ export default function ProductCatalog() {
 
   // Filter products for this selected shop
   const shopCatalog = useMemo(() => {
+    if (!selectedShop) return [];
     return products.filter(p => p.shopId === selectedShop.id);
-  }, [products, selectedShop.id]);
+  }, [products, selectedShop?.id]);
 
   // Apply search & category filters
   const filteredProducts = useMemo(() => {
