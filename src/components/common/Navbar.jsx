@@ -39,9 +39,7 @@ export default function Navbar() {
       <div className="navbar-container">
         {/* Left: Brand */}
         <div className="navbar-brand">
-          <div className="brand-logo-small">
-            <span>🏬</span>
-          </div>
+          <img src="/icon-192.png" alt="Mama Ji" className="brand-logo-img" />
           <div className="brand-text">
             <h1 className="brand-name">{t.appName}</h1>
             <span className="brand-sub">

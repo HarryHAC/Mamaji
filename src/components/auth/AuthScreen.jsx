@@ -52,11 +52,7 @@ export default function AuthScreen() {
       <div className="auth-card">
         {/* Brand */}
         <div className="auth-brand">
-          <div className="auth-logo-badge">
-            <span className="auth-logo-icon">🏬</span>
-            <span className="auth-flag">🇳🇵</span>
-          </div>
-          <h1 className="auth-brand-name">{ne ? 'मामा जी' : 'Mama Ji'}</h1>
+          <img src="/logo-web.png" alt="Mama Ji — Your Local Shopping Partner" className="auth-logo-img" />
           <p className="auth-tagline">
             {L('बोलेर सामान अर्डर गर्नुहोस् — टाइप गर्नु पर्दैन।',
                'Order groceries by voice — no typing needed.')}
