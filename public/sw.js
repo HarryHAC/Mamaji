@@ -1,6 +1,6 @@
 /* Mama Ji service worker — minimal offline shell cache. */
-const CACHE = 'mamaji-v1';
-const CORE = ['/', '/index.html', '/manifest.json', '/icon.svg'];
+const CACHE = 'mamaji-v2';
+const CORE = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
