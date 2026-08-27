@@ -1,8 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useShopAgent } from '../../context/ShopAgentContext';
 import { useApp } from '../../context/AppContext';
 import { pick } from '../../utils/i18n';
-import { Mic, StopCircle, Bot, User, ChevronDown, Headphones, Power, Sparkles } from 'lucide-react';
+import { Mic, StopCircle, Bot, User, ChevronDown, Power, Sparkles, X } from 'lucide-react';
 
 export default function ShopAgentOverlay() {
   const {
@@ -14,6 +14,10 @@ export default function ShopAgentOverlay() {
 
   // Steady listening indicator (see AIAgentOverlay) — avoids on/off flicker.
   const listeningDisplay = isAgentActive && !isSpeaking && !micBlocked;
+
+  // Discoverability: a small label above the icon (dismissible), so owners can
+  // always find the voice assistant without it covering the main content.
+  const [showHint, setShowHint] = useState(true);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -43,20 +47,27 @@ export default function ShopAgentOverlay() {
       <div className="ai-agent-fab-container shop-agent-fab-container">
         <button
           type="button"
-          className={`ai-agent-fab ${isAgentActive ? 'active' : ''} ${listeningDisplay ? 'listening' : ''}`}
+          className={`ai-agent-fab ${isAgentActive ? 'active' : ''} ${listeningDisplay ? 'listening' : ''} ${!isAgentActive ? 'idle-pulse' : ''}`}
           onClick={() => { if (!isAgentActive) toggleAgent(); else setIsAgentPanelOpen(!isAgentPanelOpen); }}
-          aria-label="Shop Assistant"
+          aria-label="Shop voice assistant"
+          title={pick(language, { ne: 'बोलेर पसल चलाउनुहोस्', en: 'Manage shop by voice', mai: 'बाजिकऽ दोकान चलाउ', bho: 'बोल के दोकान चलाईं' })}
         >
           {listeningDisplay && <div className="fab-ripple-ring"></div>}
           <div className="fab-icon-inner">
-            {isAgentActive ? (listeningDisplay ? <Mic size={28} className="mic-pulse" /> : <Bot size={28} />) : <Headphones size={28} />}
+            {isAgentActive ? (listeningDisplay ? <Mic size={26} className="mic-pulse" /> : <Bot size={26} />) : <Mic size={26} />}
           </div>
         </button>
 
-        {isAgentActive && (
+        {isAgentActive ? (
           <div className="agent-status-pill" onClick={() => setIsAgentPanelOpen(!isAgentPanelOpen)}>
             <span className={`status-dot ${listeningDisplay ? 'listening' : 'ready'}`}></span>
             <span className="status-text">{stateLabel}</span>
+          </div>
+        ) : showHint && (
+          <div className="agent-hint-bubble" onClick={toggleAgent}>
+            <Sparkles size={13} />
+            <span>{pick(language, { ne: 'पसल सहायक', en: 'Shop Assistant', mai: 'दोकान सहायक', bho: 'दोकान सहायक' })}</span>
+            <button type="button" className="hint-close" onClick={(e) => { e.stopPropagation(); setShowHint(false); }}><X size={12} /></button>
           </div>
         )}
       </div>

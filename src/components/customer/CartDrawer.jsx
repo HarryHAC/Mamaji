@@ -23,7 +23,7 @@ export default function CartDrawer() {
   if (!isCartOpen) return null;
 
   const itemsSubtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-  const deliveryCharge = calculateDeliveryFee(selectedShop, selectedShop?.distanceKm || 1.2, orderType);
+  const deliveryCharge = selectedShop ? calculateDeliveryFee(selectedShop, selectedShop?.distanceKm || 1.2, orderType) : 0;
   const grandTotal = itemsSubtotal + deliveryCharge;
 
   const handleProceedToCheckout = () => {
@@ -40,7 +40,7 @@ export default function CartDrawer() {
             <ShoppingBag size={22} className="cart-icon" />
             <div>
               <h2 className="cart-heading">{t.cart}</h2>
-              <p className="cart-shop-name">{selectedShop.name}</p>
+              <p className="cart-shop-name">{selectedShop?.name || ''}</p>
             </div>
           </div>
           <button
@@ -160,7 +160,7 @@ export default function CartDrawer() {
               </div>
               <div className="bill-row">
                 <span>
-                  {t.deliveryCharge} {orderType === 'delivery' ? `(${selectedShop.distanceKm} ${t.km})` : ''}:
+                  {t.deliveryCharge} {orderType === 'delivery' && selectedShop ? `(${selectedShop.distanceKm} ${t.km})` : ''}:
                 </span>
                 <strong>
                   {orderType === 'pickup' 

@@ -67,7 +67,7 @@ export default function CheckoutModal() {
     }
   };
 
-  if (!isCheckoutOpen) return null;
+  if (!isCheckoutOpen || !selectedShop) return null;
 
   const itemsSubtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const deliveryCharge = calculateDeliveryFee(selectedShop, selectedShop?.distanceKm || 1.2, orderType);

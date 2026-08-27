@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useAIAgent } from '../../context/AIAgentContext';
 import { useApp } from '../../context/AppContext';
 import { pick } from '../../utils/i18n';
@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   AlertCircle,
   ChevronDown,
-  Headphones,
   Power
 } from 'lucide-react';
 
@@ -40,6 +39,10 @@ export default function AIAgentOverlay() {
   // speaking (and the mic isn't blocked) we show a steady listening state,
   // so the raw recognition start/stop churn never flickers the UI on/off.
   const listeningDisplay = isAgentActive && !isSpeaking && !micBlocked;
+
+  // Small discoverability label above the icon (dismissible), so customers can
+  // always find the voice assistant without it covering the main content.
+  const [showHint, setShowHint] = useState(true);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -78,7 +81,7 @@ export default function AIAgentOverlay() {
       <div className="ai-agent-fab-container">
         <button
           type="button"
-          className={`ai-agent-fab ${isAgentActive ? 'active' : ''} ${listeningDisplay ? 'listening' : ''}`}
+          className={`ai-agent-fab ${isAgentActive ? 'active' : ''} ${listeningDisplay ? 'listening' : ''} ${!isAgentActive ? 'idle-pulse' : ''}`}
           onClick={() => {
             if (!isAgentActive) {
               toggleAgent();
@@ -86,20 +89,21 @@ export default function AIAgentOverlay() {
               setIsAgentPanelOpen(!isAgentPanelOpen);
             }
           }}
-          aria-label="AI Assistant"
+          aria-label="AI voice assistant"
+          title={pick(language, { ne: 'बोलेर सामान अर्डर गर्नुहोस्', en: 'Order groceries by voice', mai: 'बाजिकऽ अर्डर करू', bho: 'बोल के आर्डर करीं' })}
         >
           {listeningDisplay && <div className="fab-ripple-ring"></div>}
           <div className="fab-icon-inner">
             {isAgentActive ? (
-              listeningDisplay ? <Mic size={28} className="mic-pulse" /> : <Bot size={28} />
+              listeningDisplay ? <Mic size={26} className="mic-pulse" /> : <Bot size={26} />
             ) : (
-              <Headphones size={28} />
+              <Mic size={26} />
             )}
           </div>
         </button>
 
-        {/* Status Pill */}
-        {isAgentActive && (
+        {/* Status Pill (active) / discoverability hint (inactive) */}
+        {isAgentActive ? (
           <div className="agent-status-pill" onClick={() => setIsAgentPanelOpen(!isAgentPanelOpen)}>
             <span className={`status-dot ${listeningDisplay ? 'listening' : 'ready'}`}></span>
             <span className="status-text">
@@ -111,6 +115,12 @@ export default function AIAgentOverlay() {
                     ? stateLabels.LISTENING
                     : stateLabels[agentState] || stateLabels.GREETING}
             </span>
+          </div>
+        ) : showHint && (
+          <div className="agent-hint-bubble" onClick={toggleAgent}>
+            <Sparkles size={13} />
+            <span>{pick(language, { ne: 'बोलेर अर्डर गर्नुहोस्', en: 'Order by voice', mai: 'बाजिकऽ अर्डर', bho: 'बोल के आर्डर' })}</span>
+            <button type="button" className="hint-close" onClick={(e) => { e.stopPropagation(); setShowHint(false); }}><X size={12} /></button>
           </div>
         )}
 

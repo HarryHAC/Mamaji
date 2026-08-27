@@ -104,6 +104,37 @@
   text-overflow: ellipsis;
 }
 
+/* Discoverability hint bubble — sits ABOVE the FAB, small, auto-dismisses */
+.agent-hint-bubble {
+  order: -1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
+  border-radius: var(--radius-full);
+  padding: 7px 8px 7px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: var(--shadow-float);
+  cursor: pointer;
+  max-width: 190px;
+  animation: hintPop 0.3s ease;
+}
+.hint-close {
+  border: none;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  width: 18px; height: 18px;
+  border-radius: var(--radius-full);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+@keyframes hintPop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.ai-agent-fab.idle-pulse { box-shadow: 0 8px 28px rgba(243, 156, 18, 0.55); }
+.ai-agent-fab.active.idle-pulse { box-shadow: var(--shadow-float); }
+
 .agent-activate-label {
   display: inline-flex;
   align-items: center;

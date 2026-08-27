@@ -27,13 +27,8 @@ export default function CustomerHome() {
   } = useApp();
 
   // Tab: 'home' | 'shops' | 'orders'
-  const [activeTab, setActiveTab] = useState(selectedShop ? 'home' : 'shops');
+  const [activeTab, setActiveTab] = useState('home');
   const [showShopPicker, setShowShopPicker] = useState(false);
-
-  // If there's no shop to browse, keep the customer on the shops tab.
-  React.useEffect(() => {
-    if (!selectedShop && activeTab === 'home') setActiveTab('shops');
-  }, [selectedShop, activeTab]);
 
   const totalCartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
@@ -76,7 +71,23 @@ export default function CustomerHome() {
       {/* Main Content Area based on Tab */}
       <main className="customer-main-content">
         {activeTab === 'home' && (
-          <ProductCatalog />
+          selectedShop ? (
+            <ProductCatalog />
+          ) : (
+            <div className="empty-state-box">
+              <div className="empty-state-icon">🛍️</div>
+              <h3>{pick(language, { ne: 'पसल छान्नुहोस्', en: 'Choose a shop', mai: 'दोकान चुनू', bho: 'दोकान चुनीं' })}</h3>
+              <p>{pick(language, {
+                ne: 'सामान हेर्न सुरु गर्न कुनै नजिकको पसल छान्नुहोस्।',
+                en: 'Pick a nearby shop to start browsing products.',
+                mai: 'सामान देखय लेल कोनो नजदीकक दोकान चुनू।',
+                bho: 'सामान देखे खातिर कवनो नजदीक के दोकान चुनीं।'
+              })}</p>
+              <button type="button" className="btn-start-shopping" onClick={() => setActiveTab('shops')}>
+                {pick(language, { ne: 'पसलहरू हेर्नुहोस्', en: 'Browse shops', mai: 'दोकान देखू', bho: 'दोकान देखीं' })}
+              </button>
+            </div>
+          )
         )}
 
         {activeTab === 'shops' && (
