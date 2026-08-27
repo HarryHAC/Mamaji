@@ -61,18 +61,18 @@ export default function AIAgentOverlay() {
   };
 
   const stateLabels = {
-    IDLE: pick(language, { ne: 'सहायक बन्द छ', en: 'Assistant Off', mai: 'सहायक बन्द', bho: 'सहायक बंद' }),
-    GREETING: pick(language, { ne: 'तयार छ — बोल्नुहोस्', en: 'Ready — Speak', mai: 'तैयार — बाजू', bho: 'तैयार — बोलीं' }),
-    SPEAKING: pick(language, { ne: '🔊 बोल्दैछ...', en: '🔊 Speaking...', mai: '🔊 बाजि रहल...', bho: '🔊 बोलत बा...' }),
-    LISTENING: pick(language, { ne: '🎤 सुन्दैछ...', en: '🎤 Listening...', mai: '🎤 सुनि रहल...', bho: '🎤 सुनत बा...' }),
-    TAP_MIC: pick(language, { ne: '🎤 माइक थिच्नुहोस्', en: '🎤 Tap the mic', mai: '🎤 माइक थिचू', bho: '🎤 माइक दबाईं' }),
-    PROCESSING: pick(language, { ne: 'बुझ्दैछ...', en: 'Processing...', mai: 'बुझि रहल...', bho: 'समझत बा...' }),
-    CHECKOUT_PREP: pick(language, { ne: 'अर्डर तयार...', en: 'Preparing...', mai: 'अर्डर तैयार...', bho: 'आर्डर तैयार...' }),
-    CONFIRMING: pick(language, { ne: 'पुष्टि चाहिन्छ', en: 'Confirm?', mai: 'पक्का करू?', bho: 'पक्का करीं?' }),
-    PAYMENT_SELECT: pick(language, { ne: '💳 भुक्तानी छान्नुहोस्', en: '💳 Choose payment', mai: '💳 भुगतान चुनू', bho: '💳 भुगतान चुनीं' }),
-    PLACING_ORDER: pick(language, { ne: 'अर्डर पठाउँदैछ...', en: 'Placing...', mai: 'अर्डर पठा रहल...', bho: 'आर्डर भेजत बा...' }),
-    ORDER_DONE: pick(language, { ne: '✅ अर्डर भयो!', en: '✅ Done!', mai: '✅ अर्डर भेल!', bho: '✅ आर्डर भइल!' }),
-    ERROR: pick(language, { ne: '⚠️ समस्या', en: '⚠️ Error', mai: '⚠️ समस्या', bho: '⚠️ समस्या' }),
+    IDLE: pick(language, { ne: 'सहायक बन्द छ', hi: 'सहायक बंद है', en: 'Assistant Off', mai: 'सहायक बन्द', bho: 'सहायक बंद' }),
+    GREETING: pick(language, { ne: 'तयार छ — बोल्नुहोस्', hi: 'तैयार है — बोलिए', en: 'Ready — Speak', mai: 'तैयार — बाजू', bho: 'तैयार — बोलीं' }),
+    SPEAKING: pick(language, { ne: '🔊 बोल्दैछ...', hi: '🔊 बोल रहा है...', en: '🔊 Speaking...', mai: '🔊 बाजि रहल...', bho: '🔊 बोलत बा...' }),
+    LISTENING: pick(language, { ne: '🎤 सुन्दैछ...', hi: '🎤 सुन रहा है...', en: '🎤 Listening...', mai: '🎤 सुनि रहल...', bho: '🎤 सुनत बा...' }),
+    TAP_MIC: pick(language, { ne: '🎤 माइक थिच्नुहोस्', hi: '🎤 माइक दबाएँ', en: '🎤 Tap the mic', mai: '🎤 माइक थिचू', bho: '🎤 माइक दबाईं' }),
+    PROCESSING: pick(language, { ne: 'बुझ्दैछ...', hi: 'समझ रहा है...', en: 'Processing...', mai: 'बुझि रहल...', bho: 'समझत बा...' }),
+    CHECKOUT_PREP: pick(language, { ne: 'अर्डर तयार...', hi: 'ऑर्डर तैयार...', en: 'Preparing...', mai: 'अर्डर तैयार...', bho: 'आर्डर तैयार...' }),
+    CONFIRMING: pick(language, { ne: 'पुष्टि चाहिन्छ', hi: 'पुष्टि करें?', en: 'Confirm?', mai: 'पक्का करू?', bho: 'पक्का करीं?' }),
+    PAYMENT_SELECT: pick(language, { ne: '💳 भुक्तानी छान्नुहोस्', hi: '💳 भुगतान चुनें', en: '💳 Choose payment', mai: '💳 भुगतान चुनू', bho: '💳 भुगतान चुनीं' }),
+    PLACING_ORDER: pick(language, { ne: 'अर्डर पठाउँदैछ...', hi: 'ऑर्डर भेज रहा है...', en: 'Placing...', mai: 'अर्डर पठा रहल...', bho: 'आर्डर भेजत बा...' }),
+    ORDER_DONE: pick(language, { ne: '✅ अर्डर भयो!', hi: '✅ ऑर्डर हो गया!', en: '✅ Done!', mai: '✅ अर्डर भेल!', bho: '✅ आर्डर भइल!' }),
+    ERROR: pick(language, { ne: '⚠️ समस्या', hi: '⚠️ समस्या', en: '⚠️ Error', mai: '⚠️ समस्या', bho: '⚠️ समस्या' }),
   };
 
   return (
@@ -90,7 +90,7 @@ export default function AIAgentOverlay() {
             }
           }}
           aria-label="AI voice assistant"
-          title={pick(language, { ne: 'बोलेर सामान अर्डर गर्नुहोस्', en: 'Order groceries by voice', mai: 'बाजिकऽ अर्डर करू', bho: 'बोल के आर्डर करीं' })}
+          title={pick(language, { ne: 'बोलेर सामान अर्डर गर्नुहोस्', hi: 'बोलकर सामान ऑर्डर करें', en: 'Order groceries by voice', mai: 'बाजिकऽ अर्डर करू', bho: 'बोल के आर्डर करीं' })}
         >
           {listeningDisplay && <div className="fab-ripple-ring"></div>}
           <div className="fab-icon-inner">
@@ -119,7 +119,7 @@ export default function AIAgentOverlay() {
         ) : showHint && (
           <div className="agent-hint-bubble" onClick={toggleAgent}>
             <Sparkles size={13} />
-            <span>{pick(language, { ne: 'बोलेर अर्डर गर्नुहोस्', en: 'Order by voice', mai: 'बाजिकऽ अर्डर', bho: 'बोल के आर्डर' })}</span>
+            <span>{pick(language, { ne: 'बोलेर अर्डर गर्नुहोस्', hi: 'बोलकर ऑर्डर करें', en: 'Order by voice', mai: 'बाजिकऽ अर्डर', bho: 'बोल के आर्डर' })}</span>
             <button type="button" className="hint-close" onClick={(e) => { e.stopPropagation(); setShowHint(false); }}><X size={12} /></button>
           </div>
         )}
@@ -138,7 +138,7 @@ export default function AIAgentOverlay() {
                 </div>
                 <div>
                   <h3 className="agent-title">
-                    {pick(language, { ne: 'मामा जी एआई सहायक', en: 'Mama Ji AI Assistant', mai: 'मामा जी एआई सहायक', bho: 'मामा जी एआई सहायक' })}
+                    {pick(language, { ne: 'मामा जी एआई सहायक', hi: 'मामा जी एआई सहायक', en: 'Mama Ji AI Assistant', mai: 'मामा जी एआई सहायक', bho: 'मामा जी एआई सहायक' })}
                   </h3>
                   <span className={`agent-state-badge ${isSpeaking ? 'speaking' : listeningDisplay ? 'listening' : agentState.toLowerCase()}`}>
                     {isSpeaking
@@ -212,6 +212,7 @@ export default function AIAgentOverlay() {
                   className="agent-text-input"
                   placeholder={pick(language, {
                     ne: 'यहाँ टाइप गर्नुहोस् वा माइक थिच्नुहोस्...',
+                    hi: 'यहाँ टाइप करें या माइक दबाएँ...',
                     en: 'Type here or press mic...',
                     mai: 'एतय टाइप करू वा माइक थिचू...',
                     bho: 'इहाँ टाइप करीं भा माइक दबाईं...'
@@ -233,6 +234,7 @@ export default function AIAgentOverlay() {
               <p className="agent-handsfree-hint">
                 {pick(language, {
                   ne: '✨ बस बोल्नुहोस् — केही थिच्नु पर्दैन। "हो" भन्दा अर्डर आफैं हुन्छ।',
+                  hi: '✨ बस बोलिए — कुछ दबाने की ज़रूरत नहीं। "हाँ" कहते ही ऑर्डर हो जाता है।',
                   en: '✨ Just speak — no need to press. Say "Yes" and it orders itself.',
                   mai: '✨ बस बाजू — किछु थिचय के जरूरत नै। "हँ" कहलापर अर्डर आपसे भऽ जाइत अछि।',
                   bho: '✨ बस बोलीं — कुछु दबावे के जरूरत नइखे। "हँ" कहला पर आर्डर अपने-आप हो जाला।'
@@ -255,12 +257,12 @@ export default function AIAgentOverlay() {
                   {listeningDisplay ? (
                     <>
                       <StopCircle size={20} />
-                      <span>{pick(language, { ne: 'रोक्नुहोस्', en: 'Stop', mai: 'रोकू', bho: 'रोकीं' })}</span>
+                      <span>{pick(language, { ne: 'रोक्नुहोस्', hi: 'रोकें', en: 'Stop', mai: 'रोकू', bho: 'रोकीं' })}</span>
                     </>
                   ) : (
                     <>
                       <Mic size={20} />
-                      <span>{pick(language, { ne: '🎤 बोल्नुहोस्', en: '🎤 Speak', mai: '🎤 बाजू', bho: '🎤 बोलीं' })}</span>
+                      <span>{pick(language, { ne: '🎤 बोल्नुहोस्', hi: '🎤 बोलें', en: '🎤 Speak', mai: '🎤 बाजू', bho: '🎤 बोलीं' })}</span>
                     </>
                   )}
                 </button>

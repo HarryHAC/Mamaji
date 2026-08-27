@@ -5,7 +5,20 @@ import { toDevanagariNumerals } from '../utils/deliveryCalculator';
 import { soundEffects } from '../utils/audioAlerts';
 import { INITIAL_PRODUCTS } from '../constants/sampleData';
 import { AGENT } from '../constants/agentPhrases';
-import { pick } from '../utils/i18n';
+import { pick, speechLocale } from '../utils/i18n';
+
+// Pick the clearest available voice for a speech locale.
+function bestVoice(loc) {
+  try {
+    const voices = window.speechSynthesis.getVoices() || [];
+    const base = loc.split('-')[0];
+    return voices.find(v => v.lang === loc && /google|natural|neural/i.test(v.name))
+      || voices.find(v => v.lang === loc)
+      || voices.find(v => v.lang && v.lang.replace('_', '-').startsWith(base))
+      || (base !== 'en' ? voices.find(v => v.lang && v.lang.startsWith('hi')) : null)
+      || null;
+  } catch (e) { return null; }
+}
 
 const AIAgentContext = createContext();
 
@@ -178,19 +191,12 @@ export function AIAgentProvider({ children }) {
       setIsListening(false);
 
       const utterance = new SpeechSynthesisUtterance(text);
-      if (language === 'ne' || language === 'mai' || language === 'bho') {
-        utterance.lang = 'ne-NP';
-      } else {
-        utterance.lang = 'en-US';
-      }
-      utterance.rate = 0.95;
+      const loc = speechLocale(language);
+      utterance.lang = loc;
+      utterance.rate = language === 'en' ? 1.0 : 0.95; // clear, natural pace
       utterance.pitch = 1.0;
-
-      const voices = window.speechSynthesis.getVoices();
-      const neVoice = voices.find(v => v.lang?.startsWith('ne') || v.lang?.startsWith('hi'));
-      if (neVoice && (language === 'ne' || language === 'mai' || language === 'bho')) {
-        utterance.voice = neVoice;
-      }
+      const v = bestVoice(loc);
+      if (v) utterance.voice = v;
 
       let finished = false;
       const done = () => { if (finished) return; finished = true; resumeAfter(); };
@@ -238,15 +244,22 @@ export function AIAgentProvider({ children }) {
 
       let interim = '';
       let final = '';
+      let conf = 0, finalCount = 0;
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const res = event.results[i];
-        if (res.isFinal) final += res[0].transcript;
+        if (res.isFinal) { final += res[0].transcript; conf += (res[0].confidence || 0); finalCount++; }
         else interim += res[0].transcript;
       }
 
       setTranscript(interim || final);
 
       if (final.trim()) {
+        const clean = final.trim();
+        const avgConf = finalCount ? conf / finalCount : 0;
+        // Drop obvious background noise: 1-char blips, or a low-confidence tiny phrase.
+        if (clean.length < 2) return;
+        if (avgConf > 0 && avgConf < 0.35 && clean.length < 6) return;
+
         finalBufferRef.current = (finalBufferRef.current + ' ' + final).trim();
         // Debounce: wait briefly in case the sentence arrives in several pieces.
         clearTimeout(processTimerRef.current);
@@ -254,8 +267,8 @@ export function AIAgentProvider({ children }) {
           const text = finalBufferRef.current.trim();
           finalBufferRef.current = '';
           setTranscript('');
-          if (text) latestRef.current.processUserInput?.(text);
-        }, 850);
+          if (text && text.length >= 2) latestRef.current.processUserInput?.(text);
+        }, 900);
       }
     };
 
@@ -291,7 +304,7 @@ export function AIAgentProvider({ children }) {
     const rec = recognitionRef.current;
     if (!rec) return;
     // Apply the current language on every start so switches take effect.
-    rec.lang = (language === 'ne' || language === 'mai' || language === 'bho') ? 'ne-NP' : 'en-US';
+    rec.lang = speechLocale(language);
     try {
       rec.start();
       setIsListening(true);

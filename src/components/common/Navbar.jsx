@@ -13,7 +13,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
 
-  const ne = language === 'ne' || language === 'mai' || language === 'bho';
+  const ne = language !== 'en'; // Devanagari languages (ne/hi/mai/bho)
   const activity = currentUser ? getActivity(currentUser.id).slice(0, 6) : [];
   const activityLabel = (type) => ({
     register: ne ? 'खाता दर्ता' : 'Registered',

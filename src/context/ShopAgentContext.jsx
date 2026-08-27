@@ -5,8 +5,21 @@ import { soundEffects } from '../utils/audioAlerts';
 import { SHOP_AGENT } from '../constants/shopAgentPhrases';
 import { getShopCategories } from '../constants/shopTypes';
 import { parseSpokenNumber, parseUnit } from '../utils/voiceParse';
+import { speechLocale } from '../utils/i18n';
 
 const ShopAgentContext = createContext();
+
+function bestVoice(loc) {
+  try {
+    const voices = window.speechSynthesis.getVoices() || [];
+    const base = loc.split('-')[0];
+    return voices.find(v => v.lang === loc && /google|natural|neural/i.test(v.name))
+      || voices.find(v => v.lang === loc)
+      || voices.find(v => v.lang && v.lang.replace('_', '-').startsWith(base))
+      || (base !== 'en' ? voices.find(v => v.lang && v.lang.startsWith('hi')) : null)
+      || null;
+  } catch (e) { return null; }
+}
 
 // Find a product in the shop by matching spoken text against its name/alias.
 function findProduct(text, products) {
@@ -94,11 +107,12 @@ export function ShopAgentProvider({ children }) {
       try { recognitionRef.current?.stop(); } catch (e) { /* ignore */ }
       setIsListening(false);
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = (language === 'en') ? 'en-US' : 'ne-NP';
-      u.rate = 0.97; u.pitch = 1.0;
-      const voices = window.speechSynthesis.getVoices();
-      const nv = voices.find(v => v.lang?.startsWith('ne') || v.lang?.startsWith('hi'));
-      if (nv && language !== 'en') u.voice = nv;
+      const loc = speechLocale(language);
+      u.lang = loc;
+      u.rate = language === 'en' ? 1.0 : 0.95;
+      u.pitch = 1.0;
+      const v = bestVoice(loc);
+      if (v) u.voice = v;
       let done = false;
       const finish = () => { if (done) return; done = true; resumeAfter(); };
       u.onend = finish; u.onerror = finish;
@@ -123,21 +137,26 @@ export function ShopAgentProvider({ children }) {
     rec.onstart = () => { setIsListening(true); setMicBlocked(false); };
     rec.onresult = (event) => {
       if (isSpeakingRef.current) return;
-      let interim = '', final = '';
+      let interim = '', final = '', conf = 0, finalCount = 0;
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const r = event.results[i];
-        if (r.isFinal) final += r[0].transcript; else interim += r[0].transcript;
+        if (r.isFinal) { final += r[0].transcript; conf += (r[0].confidence || 0); finalCount++; }
+        else interim += r[0].transcript;
       }
       setTranscript(interim || final);
       if (final.trim()) {
+        const clean = final.trim();
+        const avgConf = finalCount ? conf / finalCount : 0;
+        if (clean.length < 2) return;
+        if (avgConf > 0 && avgConf < 0.35 && clean.length < 6) return;
         finalBufferRef.current = (finalBufferRef.current + ' ' + final).trim();
         clearTimeout(processTimerRef.current);
         processTimerRef.current = setTimeout(() => {
           const text = finalBufferRef.current.trim();
           finalBufferRef.current = '';
           setTranscript('');
-          if (text) latestRef.current.process?.(text);
-        }, 850);
+          if (text && text.length >= 2) latestRef.current.process?.(text);
+        }, 900);
       }
     };
     rec.onerror = (event) => {
@@ -165,7 +184,7 @@ export function ShopAgentProvider({ children }) {
     if (!recognitionRef.current) recognitionRef.current = buildRecognition();
     const rec = recognitionRef.current;
     if (!rec) return;
-    rec.lang = (language === 'en') ? 'en-US' : 'ne-NP';
+    rec.lang = speechLocale(language);
     try { rec.start(); setIsListening(true); } catch (e) { /* already started */ }
   }, [buildRecognition, language]);
 

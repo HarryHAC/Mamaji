@@ -8,5 +8,25 @@
  */
 export function pick(language, variants) {
   if (!variants) return '';
-  return variants[language] || variants.ne || variants.en || '';
+  // Fallback chain: exact → Hindi → Nepali → English (all Devanagari-friendly).
+  return variants[language] || variants.hi || variants.ne || variants.en || '';
+}
+
+// Best speech-recognition / speech-synthesis locale for a UI language.
+// Hindi (hi-IN) has the widest, clearest browser voice support, so Maithili &
+// Bhojpuri (close to Hindi, and lacking their own voices) use it too.
+export function speechLocale(language) {
+  switch (language) {
+    case 'en': return 'en-US';
+    case 'ne': return 'ne-NP';
+    case 'hi':
+    case 'mai':
+    case 'bho':
+    default: return 'hi-IN';
+  }
+}
+
+// Is this language written in Devanagari (i.e. not English)?
+export function isDevanagari(language) {
+  return language !== 'en';
 }

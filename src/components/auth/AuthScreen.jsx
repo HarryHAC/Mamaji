@@ -32,7 +32,7 @@ export default function AuthScreen() {
     finally { setLocBusy(false); }
   };
 
-  const ne = language === 'ne' || language === 'mai' || language === 'bho';
+  const ne = language !== 'en'; // Devanagari languages (ne/hi/mai/bho)
   const L = (nep, eng) => (ne ? nep : eng);
 
   const handleSubmit = (e) => {

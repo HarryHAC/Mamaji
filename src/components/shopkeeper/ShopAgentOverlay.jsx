@@ -32,14 +32,14 @@ export default function ShopAgentOverlay() {
   };
 
   const stateLabel = isSpeaking
-    ? pick(language, { ne: '🔊 बोल्दैछ...', en: '🔊 Speaking...', mai: '🔊 बाजि रहल...', bho: '🔊 बोलत बा...' })
+    ? pick(language, { ne: '🔊 बोल्दैछ...', hi: '🔊 बोल रहा है...', en: '🔊 Speaking...', mai: '🔊 बाजि रहल...', bho: '🔊 बोलत बा...' })
     : micBlocked
-      ? pick(language, { ne: '🎤 माइक थिच्नुहोस्', en: '🎤 Tap the mic', mai: '🎤 माइक थिचू', bho: '🎤 माइक दबाईं' })
+      ? pick(language, { ne: '🎤 माइक थिच्नुहोस्', hi: '🎤 माइक दबाएँ', en: '🎤 Tap the mic', mai: '🎤 माइक थिचू', bho: '🎤 माइक दबाईं' })
       : listeningDisplay
-        ? pick(language, { ne: '🎤 सुन्दैछ...', en: '🎤 Listening...', mai: '🎤 सुनि रहल...', bho: '🎤 सुनत बा...' })
+        ? pick(language, { ne: '🎤 सुन्दैछ...', hi: '🎤 सुन रहा है...', en: '🎤 Listening...', mai: '🎤 सुनि रहल...', bho: '🎤 सुनत बा...' })
         : (agentState === 'IDLE'
-          ? pick(language, { ne: 'सहायक बन्द', en: 'Assistant Off', mai: 'सहायक बन्द', bho: 'सहायक बंद' })
-          : pick(language, { ne: 'तयार — बोल्नुहोस्', en: 'Ready — Speak', mai: 'तैयार — बाजू', bho: 'तैयार — बोलीं' }));
+          ? pick(language, { ne: 'सहायक बन्द', hi: 'सहायक बंद है', en: 'Assistant Off', mai: 'सहायक बन्द', bho: 'सहायक बंद' })
+          : pick(language, { ne: 'तयार — बोल्नुहोस्', hi: 'तैयार — बोलिए', en: 'Ready — Speak', mai: 'तैयार — बाजू', bho: 'तैयार — बोलीं' }));
 
   return (
     <>
@@ -50,7 +50,7 @@ export default function ShopAgentOverlay() {
           className={`ai-agent-fab ${isAgentActive ? 'active' : ''} ${listeningDisplay ? 'listening' : ''} ${!isAgentActive ? 'idle-pulse' : ''}`}
           onClick={() => { if (!isAgentActive) toggleAgent(); else setIsAgentPanelOpen(!isAgentPanelOpen); }}
           aria-label="Shop voice assistant"
-          title={pick(language, { ne: 'बोलेर पसल चलाउनुहोस्', en: 'Manage shop by voice', mai: 'बाजिकऽ दोकान चलाउ', bho: 'बोल के दोकान चलाईं' })}
+          title={pick(language, { ne: 'बोलेर पसल चलाउनुहोस्', hi: 'बोलकर दुकान चलाएँ', en: 'Manage shop by voice', mai: 'बाजिकऽ दोकान चलाउ', bho: 'बोल के दोकान चलाईं' })}
         >
           {listeningDisplay && <div className="fab-ripple-ring"></div>}
           <div className="fab-icon-inner">
@@ -66,7 +66,7 @@ export default function ShopAgentOverlay() {
         ) : showHint && (
           <div className="agent-hint-bubble" onClick={toggleAgent}>
             <Sparkles size={13} />
-            <span>{pick(language, { ne: 'पसल सहायक', en: 'Shop Assistant', mai: 'दोकान सहायक', bho: 'दोकान सहायक' })}</span>
+            <span>{pick(language, { ne: 'पसल सहायक', hi: 'दुकान सहायक', en: 'Shop Assistant', mai: 'दोकान सहायक', bho: 'दोकान सहायक' })}</span>
             <button type="button" className="hint-close" onClick={(e) => { e.stopPropagation(); setShowHint(false); }}><X size={12} /></button>
           </div>
         )}
@@ -81,7 +81,7 @@ export default function ShopAgentOverlay() {
                 <div className="agent-avatar-box"><Bot size={22} /></div>
                 <div>
                   <h3 className="agent-title">
-                    {pick(language, { ne: 'पसल एआई सहायक', en: 'Shop AI Assistant', mai: 'दोकान एआई सहायक', bho: 'दोकान एआई सहायक' })}
+                    {pick(language, { ne: 'पसल एआई सहायक', hi: 'दुकान एआई सहायक', en: 'Shop AI Assistant', mai: 'दोकान एआई सहायक', bho: 'दोकान एआई सहायक' })}
                   </h3>
                   <span className={`agent-state-badge ${isSpeaking ? 'speaking' : listeningDisplay ? 'listening' : ''}`}>{stateLabel}</span>
                 </div>
@@ -115,6 +115,7 @@ export default function ShopAgentOverlay() {
               <p className="agent-handsfree-hint">
                 {pick(language, {
                   ne: '✨ बोलेर सामान थप्नुहोस् वा मूल्य/स्टक बदल्नुहोस्।',
+                  hi: '✨ बोलकर सामान जोड़ें या दाम/स्टॉक बदलें।',
                   en: '✨ Add items or change price/stock just by speaking.',
                   mai: '✨ बाजिकऽ सामान जोड़ू वा दाम/स्टक बदलू।',
                   bho: '✨ बोल के सामान जोड़ीं भा दाम/स्टॉक बदलीं।'
@@ -125,7 +126,7 @@ export default function ShopAgentOverlay() {
                   type="text"
                   ref={inputRef}
                   className="agent-text-input"
-                  placeholder={pick(language, { ne: 'यहाँ टाइप गर्नुहोस् वा माइक थिच्नुहोस्...', en: 'Type here or press mic...', mai: 'एतय टाइप करू...', bho: 'इहाँ टाइप करीं...' })}
+                  placeholder={pick(language, { ne: 'यहाँ टाइप गर्नुहोस् वा माइक थिच्नुहोस्...', hi: 'यहाँ टाइप करें या माइक दबाएँ...', en: 'Type here or press mic...', mai: 'एतय टाइप करू...', bho: 'इहाँ टाइप करीं...' })}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleManualSend(); }}
                 />
                 <button type="button" className="btn-agent-send" onClick={handleManualSend}>→</button>
@@ -137,8 +138,8 @@ export default function ShopAgentOverlay() {
                   onClick={() => { if (listeningDisplay) stopListening(); else startListening(); }}
                 >
                   {listeningDisplay
-                    ? <><StopCircle size={20} /> <span>{pick(language, { ne: 'रोक्नुहोस्', en: 'Stop', mai: 'रोकू', bho: 'रोकीं' })}</span></>
-                    : <><Mic size={20} /> <span>{pick(language, { ne: '🎤 बोल्नुहोस्', en: '🎤 Speak', mai: '🎤 बाजू', bho: '🎤 बोलीं' })}</span></>}
+                    ? <><StopCircle size={20} /> <span>{pick(language, { ne: 'रोक्नुहोस्', hi: 'रोकें', en: 'Stop', mai: 'रोकू', bho: 'रोकीं' })}</span></>
+                    : <><Mic size={20} /> <span>{pick(language, { ne: '🎤 बोल्नुहोस्', hi: '🎤 बोलें', en: '🎤 Speak', mai: '🎤 बाजू', bho: '🎤 बोलीं' })}</span></>}
                 </button>
               </div>
             </div>
