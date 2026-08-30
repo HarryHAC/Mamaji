@@ -182,6 +182,59 @@
   line-height: 1.4;
 }
 
+/* ── Forgot password / OTP flow ── */
+.auth-info {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.auth-forgot-link {
+  align-self: flex-end;
+  border: none; background: transparent;
+  color: var(--primary); font-weight: 700; font-size: 12.5px;
+  cursor: pointer; padding: 2px 2px; margin-top: -4px;
+}
+.auth-forgot { display: flex; flex-direction: column; gap: 14px; }
+.auth-forgot-head { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.auth-forgot-icon {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+.auth-forgot-title { font-size: 19px; font-weight: 800; color: var(--text-main); }
+.auth-forgot-sub { font-size: 12.5px; color: var(--text-muted); line-height: 1.45; max-width: 300px; }
+.auth-otp-demo {
+  display: flex; align-items: flex-start; gap: 9px;
+  background: var(--accent-saffron-light, #FFF7ED);
+  border: 1px dashed var(--accent-saffron, #F59E0B);
+  border-radius: var(--radius-sm);
+  padding: 10px 11px;
+  color: var(--text-main);
+}
+.auth-otp-demo strong { display: block; font-size: 13.5px; font-weight: 700; }
+.auth-otp-demo small { display: block; font-size: 10.5px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+.auth-otp-code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 18px; font-weight: 900;
+  letter-spacing: 3px;
+  color: var(--primary-dark);
+}
+.auth-resend-link {
+  border: none; background: transparent;
+  color: var(--primary); font-weight: 700; font-size: 12.5px;
+  cursor: pointer; padding: 4px; text-align: center;
+}
+.auth-back-login {
+  text-align: center; margin-top: 2px; font-size: 13px;
+}
+
 /* ── Profile menu (navbar) ── */
 .profile-menu-wrap { position: relative; }
 .profile-avatar-btn {

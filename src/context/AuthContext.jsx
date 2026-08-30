@@ -43,6 +43,35 @@ const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 const isPhone = (v) => /^(\+?977[- ]?)?9\d{9}$/.test(String(v).replace(/[\s-]/g, ''));
 const normalizePhone = (v) => String(v).replace(/[\s-]/g, '').replace(/^\+?977/, '');
 
+// ── Password-reset OTP (demo) ──
+// NOTE: With no backend we cannot actually send an SMS or email, so the OTP is
+// generated + verified locally and shown on-screen (clearly labelled a demo).
+// In production, requestPasswordReset() would POST to a server that sends the
+// code over SMS/email and verification would happen server-side.
+const OTP_TTL_MS = 5 * 60 * 1000;   // codes expire after 5 minutes
+const OTP_MAX_ATTEMPTS = 5;         // lock the code after too many wrong tries
+const otpKey = (uid) => `apna_pwreset_${uid}`;
+
+const genOtp = () => String(Math.floor(100000 + Math.random() * 900000)); // 6 digits
+
+const maskPhone = (p) => (!p ? '' : (p.length > 4 ? p.slice(0, 2) + '****' + p.slice(-2) : p));
+const maskEmail = (e) => {
+  if (!e) return '';
+  const [u, d] = e.split('@');
+  if (!d) return e;
+  const mu = u.length <= 2 ? u[0] + '*' : u.slice(0, 2) + '*'.repeat(Math.max(1, u.length - 2));
+  return `${mu}@${d}`;
+};
+
+const findUserByIdentifier = (rawId) => {
+  const cleanId = (rawId || '').trim();
+  if (!cleanId) return null;
+  const phone = isPhone(cleanId) ? normalizePhone(cleanId) : '';
+  const email = isEmail(cleanId) ? cleanId.toLowerCase() : '';
+  if (!phone && !email) return null;
+  return loadUsers().find(u => (phone && u.phone === phone) || (email && u.email === email)) || null;
+};
+
 export function AuthProvider({ children }) {
   const [users, setUsers] = useState(loadUsers);
   const [currentUser, setCurrentUser] = useState(null);
@@ -170,6 +199,73 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(SESSION_KEY);
   }, []);
 
+  // ── Forgot password: step 1 — generate + "send" an OTP ──
+  // Finds the account, creates a 6-digit code (5-min expiry) and returns the
+  // channels it was delivered to (phone / email / both). Since there is no
+  // backend, `demoOtp` is returned so the UI can display it.
+  const requestPasswordReset = useCallback(({ identifier }) => {
+    const user = findUserByIdentifier(identifier);
+    if (!user) {
+      return { success: false, error: 'यो फोन/इमेलमा खाता भेटिएन / No account found for that phone/email.' };
+    }
+
+    // Deliver to every contact on file for this account.
+    const destinations = [];
+    if (user.phone) destinations.push({ channel: 'phone', value: user.phone, masked: maskPhone(user.phone) });
+    if (user.email) destinations.push({ channel: 'email', value: user.email, masked: maskEmail(user.email) });
+    if (destinations.length === 0) {
+      return { success: false, error: 'यो खातामा फोन/इमेल छैन / This account has no phone or email on file.' };
+    }
+
+    const otp = genOtp();
+    try {
+      localStorage.setItem(otpKey(user.id), JSON.stringify({
+        otp, expiresAt: Date.now() + OTP_TTL_MS, attempts: 0
+      }));
+    } catch (e) { /* ignore quota */ }
+
+    logActivity(user.id, 'password_reset_requested', destinations.map(d => d.channel).join('+'));
+    return { success: true, userId: user.id, destinations, demoOtp: otp, ttlMinutes: OTP_TTL_MS / 60000 };
+  }, [logActivity]);
+
+  // ── Forgot password: step 2 — verify the OTP and set a new password ──
+  const resetPasswordWithOtp = useCallback(({ identifier, otp, newPassword }) => {
+    const user = findUserByIdentifier(identifier);
+    if (!user) {
+      return { success: false, error: 'खाता भेटिएन / Account not found.' };
+    }
+    let rec;
+    try { rec = JSON.parse(localStorage.getItem(otpKey(user.id)) || 'null'); } catch (e) { rec = null; }
+    if (!rec) {
+      return { success: false, error: 'पहिले OTP माग्नुहोस् / Request an OTP first.' };
+    }
+    if (Date.now() > rec.expiresAt) {
+      localStorage.removeItem(otpKey(user.id));
+      return { success: false, error: 'OTP को समय सकियो, फेरि माग्नुहोस् / OTP expired. Please request a new one.' };
+    }
+    if (rec.attempts >= OTP_MAX_ATTEMPTS) {
+      localStorage.removeItem(otpKey(user.id));
+      return { success: false, error: 'धेरै पटक गलत भयो, नयाँ OTP माग्नुहोस् / Too many attempts. Request a new OTP.' };
+    }
+    if (String(otp || '').trim() !== rec.otp) {
+      rec.attempts += 1;
+      try { localStorage.setItem(otpKey(user.id), JSON.stringify(rec)); } catch (e) { /* ignore */ }
+      const left = OTP_MAX_ATTEMPTS - rec.attempts;
+      return { success: false, error: `OTP मिलेन (${left} पटक बाँकी) / Incorrect OTP (${left} left).` };
+    }
+    if (!newPassword || newPassword.length < 4) {
+      return { success: false, error: 'कम्तिमा ४ अक्षरको नयाँ पासवर्ड / New password must be at least 4 characters.' };
+    }
+
+    // Success — update the password and clear the code.
+    const merged = { ...user, passwordHash: hashPassword(newPassword) };
+    const next = loadUsers().map(u => (u.id === user.id ? merged : u));
+    persistUsers(next);
+    localStorage.removeItem(otpKey(user.id));
+    logActivity(user.id, 'password_reset', '');
+    return { success: true };
+  }, [persistUsers, logActivity]);
+
   // Update the current user's profile.
   const updateProfile = useCallback((fields) => {
     if (!currentUser) return;
@@ -188,6 +284,8 @@ export function AuthProvider({ children }) {
       register,
       login,
       logout,
+      requestPasswordReset,
+      resetPasswordWithOtp,
       updateProfile,
       logActivity,
       getActivity
