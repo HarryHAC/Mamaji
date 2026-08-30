@@ -10,6 +10,19 @@ export const INITIAL_PRODUCTS = [];
 export const INITIAL_ORDERS = [];
 export const INITIAL_EXPENSES = [];
 
+// Neutral, self-contained "no photo yet" placeholder for a product without an
+// image. Works for ANY shop type (grocery, wholesale, hardware, pharmacy, …)
+// and needs no network (unlike the grocery stock photos below).
+export const PRODUCT_PLACEHOLDER_IMG =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">` +
+      `<rect width="120" height="120" rx="14" fill="#f1f3f5"/>` +
+      `<g fill="none" stroke="#adb5bd" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">` +
+      `<rect x="34" y="40" width="52" height="44" rx="5"/>` +
+      `<path d="M44 40l4-8h24l4 8"/><circle cx="60" cy="62" r="11"/></g></svg>`
+  );
+
 // Generic stock photos used as a fallback when an owner doesn't provide an image.
 export const GENERIC_PRODUCT_IMAGES = {
   potato: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400&auto=format&fit=crop&q=80',

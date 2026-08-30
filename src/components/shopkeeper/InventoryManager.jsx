@@ -1,25 +1,35 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useShopkeeper } from '../../context/ShopkeeperContext';
 import { useApp } from '../../context/AppContext';
 import { getShopCategories } from '../../constants/shopTypes';
 import { toDevanagariNumerals } from '../../utils/deliveryCalculator';
 import { pick } from '../../utils/i18n';
-import { fileToDataURL, videoFrameToDataURL } from '../../utils/imageCapture';
+import { fileToDataURL } from '../../utils/imageCapture';
 import {
   Plus,
   Edit2,
   Trash2,
   AlertTriangle,
-  Sparkles,
   Search,
   Check,
   X,
   Package,
   Image as ImageIcon,
-  RefreshCw,
   Camera,
   Upload
 } from 'lucide-react';
+
+// Neutral "no photo yet" placeholder — works for ANY shop type (grocery,
+// sweets, hardware, pharmacy, wholesale, …), not a grocery-specific stock image.
+const PLACEHOLDER_IMG =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">` +
+      `<rect width="120" height="120" rx="14" fill="#f1f3f5"/>` +
+      `<g fill="none" stroke="#adb5bd" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">` +
+      `<rect x="34" y="40" width="52" height="44" rx="5"/>` +
+      `<path d="M44 40l4-8h24l4 8"/><circle cx="60" cy="62" r="11"/></g></svg>`
+  );
 
 export default function InventoryManager() {
   const {
@@ -29,7 +39,6 @@ export default function InventoryManager() {
     deleteProduct,
     updateProductStock,
     toggleProductAvailability,
-    suggestImageForProduct,
     shopData
   } = useShopkeeper();
   const { t, language } = useApp();
@@ -38,11 +47,10 @@ export default function InventoryManager() {
   const CATEGORIES = getShopCategories(shopData);
   const firstCategoryId = CATEGORIES.find(c => c.id !== 'all')?.id || 'general';
 
-  // Product photo: live camera + file upload
-  const fileInputRef = useRef(null);
-  const videoRef = useRef(null);
-  const streamRef = useRef(null);
-  const [showCamera, setShowCamera] = useState(false);
+  // Product photo: native camera capture + gallery upload (two separate inputs
+  // so "Camera" opens the camera and "Upload" opens the gallery on mobile).
+  const fileInputRef = useRef(null);   // gallery / files (no capture attribute)
+  const cameraInputRef = useRef(null); // camera (capture="environment")
   const [imageBusy, setImageBusy] = useState(false);
   const [cameraError, setCameraError] = useState('');
 
@@ -100,14 +108,7 @@ export default function InventoryManager() {
     setIsModalOpen(true);
   };
 
-  // AI Automatic Image Suggestion (Section 8)
-  const handleGenerateAIImage = () => {
-    const query = nameNe || nameEn;
-    const suggested = suggestImageForProduct(query);
-    setImage(suggested);
-  };
-
-  // ── Upload a photo from the device ──
+  // ── Read a photo from the device (camera capture OR gallery) ──
   const handleFileUpload = async (e) => {
     const file = e.target.files && e.target.files[0];
     e.target.value = ''; // allow re-selecting the same file later
@@ -125,78 +126,11 @@ export default function InventoryManager() {
     }
   };
 
-  // ── Live camera capture ──
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(tr => tr.stop());
-      streamRef.current = null;
-    }
-  };
-
-  const openCamera = async () => {
-    setCameraError('');
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setCameraError(pick(language, {
-        ne: 'यो यन्त्रमा क्यामेरा उपलब्ध छैन।', en: 'Camera is not available on this device.',
-        mai: 'ई यन्त्रमे क्यामेरा उपलब्ध नै।', bho: 'ई डिवाइस पर क्यामेरा नइखे।'
-      }));
-      return;
-    }
-    setShowCamera(true);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }, audio: false
-      });
-      streamRef.current = stream;
-      // The <video> mounts a render after setShowCamera(true); retry until it exists.
-      const attach = () => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play().catch(() => {});
-        } else {
-          requestAnimationFrame(attach);
-        }
-      };
-      attach();
-    } catch (err) {
-      setShowCamera(false);
-      setCameraError(pick(language, {
-        ne: 'क्यामेरा अनुमति दिनुहोस्, अनि फेरि प्रयास गर्नुहोस्।',
-        en: 'Please allow camera access and try again.',
-        mai: 'क्यामेरा अनुमति दिअ\' आ फेर प्रयास करू।',
-        bho: 'क्यामेरा अनुमति दीं आ फेर कोसिस करीं।'
-      }));
-    }
-  };
-
-  const capturePhoto = () => {
-    try {
-      const dataUrl = videoFrameToDataURL(videoRef.current, 800, 0.82);
-      setImage(dataUrl);
-    } catch (err) {
-      setCameraError(pick(language, {
-        ne: 'फोटो खिच्न सकिएन, फेरि प्रयास गर्नुहोस्।', en: 'Could not capture, try again.',
-        mai: 'फोटो खींचि नै सकल, फेर करू।', bho: 'फोटो खींच ना सकल, फेर करीं।'
-      }));
-      return;
-    }
-    closeCamera();
-  };
-
-  const closeCamera = () => {
-    stopCamera();
-    setShowCamera(false);
-  };
-
-  // Release the camera if the modal/component goes away
-  useEffect(() => () => stopCamera(), []);
-  useEffect(() => { if (!isModalOpen) closeCamera(); }, [isModalOpen]);
-
   const handleSubmitProduct = (e) => {
     e.preventDefault();
     if (!nameNe.trim() || !price) return;
 
-    const finalImage = image || suggestImageForProduct(nameNe || nameEn);
+    const finalImage = image || PLACEHOLDER_IMG;
 
     if (editingProductId) {
       editProduct(editingProductId, {
@@ -399,14 +333,9 @@ export default function InventoryManager() {
                     type="text"
                     required
                     className="form-input"
-                    placeholder="जस्तै: आलु (रातो)"
+                    placeholder={pick(language, { ne: 'सामानको नाम', hi: 'सामान का नाम', en: 'Product name', mai: 'सामानक नाम', bho: 'सामान के नाम' })}
                     value={nameNe}
-                    onChange={(e) => {
-                      setNameNe(e.target.value);
-                      if (!image) {
-                        setImage(suggestImageForProduct(e.target.value));
-                      }
-                    }}
+                    onChange={(e) => setNameNe(e.target.value)}
                   />
                 </div>
                 <div className="form-group">
@@ -414,7 +343,7 @@ export default function InventoryManager() {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="e.g. Red Potato"
+                    placeholder={pick(language, { ne: 'नाम (अंग्रेजीमा)', hi: 'नाम (अंग्रेज़ी में)', en: 'Name in English', mai: 'नाम (अंग्रेजीमे)', bho: 'नाम (अंग्रेजी में)' })}
                     value={nameEn}
                     onChange={(e) => setNameEn(e.target.value)}
                   />
@@ -438,11 +367,11 @@ export default function InventoryManager() {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">ब्रान्ड / कम्पनी (ऐच्छिक)</label>
+                  <label className="form-label">{pick(language, { ne: 'ब्रान्ड / कम्पनी (ऐच्छिक)', hi: 'ब्रांड / कंपनी (वैकल्पिक)', en: 'Brand / Company (optional)', mai: 'ब्रान्ड / कम्पनी (ऐच्छिक)', bho: 'ब्रांड / कंपनी (वैकल्पिक)' })}</label>
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="जस्तै: Dhara, DDC, Local"
+                    placeholder={pick(language, { ne: 'ब्रान्ड नाम', hi: 'ब्रांड नाम', en: 'Brand name', mai: 'ब्रान्ड नाम', bho: 'ब्रांड नाम' })}
                     value={brand}
                     onChange={(e) => setBrand(e.target.value)}
                   />
@@ -510,7 +439,7 @@ export default function InventoryManager() {
                 </div>
               </div>
 
-              {/* Product Image Section — camera, upload, or AI suggestion */}
+              {/* Product Image Section — camera capture or gallery upload */}
               <div className="ai-image-generator-box">
                 <div className="ai-image-header">
                   <label className="form-label">
@@ -522,33 +451,39 @@ export default function InventoryManager() {
 
                 <div className="image-preview-row">
                   <img
-                    src={image || suggestImageForProduct(nameNe || nameEn)}
+                    src={image || PLACEHOLDER_IMG}
                     alt="Preview"
                     className="product-modal-img-preview"
                   />
                   <div className="image-url-input-wrap">
                     <div className="photo-source-btns">
-                      <button type="button" className="btn-photo-src camera" onClick={openCamera}>
-                        <Camera size={15} /> <span>{pick(language, { ne: 'क्यामेरा', en: 'Camera', mai: 'क्यामेरा', bho: 'क्यामेरा' })}</span>
+                      <button type="button" className="btn-photo-src camera" onClick={() => cameraInputRef.current?.click()}>
+                        <Camera size={15} /> <span>{pick(language, { ne: 'क्यामेरा', hi: 'कैमरा', en: 'Camera', mai: 'क्यामेरा', bho: 'क्यामेरा' })}</span>
                       </button>
                       <button type="button" className="btn-photo-src upload" onClick={() => fileInputRef.current?.click()}>
-                        <Upload size={15} /> <span>{pick(language, { ne: 'अपलोड', en: 'Upload', mai: 'अपलोड', bho: 'अपलोड' })}</span>
-                      </button>
-                      <button type="button" className="btn-photo-src ai" onClick={handleGenerateAIImage}>
-                        <Sparkles size={15} /> <span>{pick(language, { ne: 'एआई', en: 'AI', mai: 'एआई', bho: 'एआई' })}</span>
+                        <Upload size={15} /> <span>{pick(language, { ne: 'ग्यालरी', hi: 'गैलरी', en: 'Gallery', mai: 'ग्यालरी', bho: 'गैलरी' })}</span>
                       </button>
                     </div>
 
+                    {/* Camera: capture="environment" opens the phone camera */}
                     <input
-                      ref={fileInputRef}
+                      ref={cameraInputRef}
                       type="file"
                       accept="image/*"
                       capture="environment"
                       style={{ display: 'none' }}
                       onChange={handleFileUpload}
                     />
+                    {/* Gallery: NO capture attribute → opens the photo gallery */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={handleFileUpload}
+                    />
 
-                    {String(image).startsWith('data:') ? (
+                    {String(image).startsWith('data:') && !String(image).startsWith('data:image/svg') ? (
                       <div className="photo-attached-chip">
                         <Check size={14} />
                         <span>{pick(language, { ne: 'फोटो संलग्न भयो', en: 'Photo attached', mai: 'फोटो संलग्न भेल', bho: 'फोटो लाग गइल' })}</span>
@@ -571,10 +506,11 @@ export default function InventoryManager() {
                     {cameraError && <small className="hint-text error">{cameraError}</small>}
                     {!cameraError && !imageBusy && (
                       <small className="hint-text">{pick(language, {
-                        ne: 'क्यामेराले खिच्नुहोस्, ग्यालरीबाट अपलोड गर्नुहोस्, वा एआईले फोटो छान्न दिनुहोस्।',
-                        en: 'Snap with the camera, upload from gallery, or let AI pick a photo.',
-                        mai: 'क्यामेरासँ खींचू, ग्यालरीसँ अपलोड करू, वा एआईके फोटो चुनय दिअ\'।',
-                        bho: 'क्यामेरा से खींचीं, गैलरी से अपलोड करीं, भा एआई के फोटो चुने दीं।'
+                        ne: 'क्यामेराले फोटो खिच्नुहोस् वा ग्यालरीबाट छान्नुहोस्।',
+                        hi: 'कैमरे से फोटो खींचें या गैलरी से चुनें।',
+                        en: 'Take a photo with the camera or pick one from the gallery.',
+                        mai: 'क्यामेरासँ फोटो खींचू वा ग्यालरीसँ चुनू।',
+                        bho: 'क्यामेरा से फोटो खींचीं भा गैलरी से चुनीं।'
                       })}</small>
                     )}
                   </div>
@@ -599,27 +535,6 @@ export default function InventoryManager() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* Live Camera Capture Overlay */}
-      {showCamera && (
-        <div className="camera-modal-backdrop" onClick={closeCamera}>
-          <div className="camera-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="camera-video-wrap">
-              <video ref={videoRef} className="camera-video" playsInline muted autoPlay />
-            </div>
-            <div className="camera-controls">
-              <button type="button" className="btn-cam-cancel" onClick={closeCamera}>
-                <X size={18} />
-                <span>{pick(language, { ne: 'रद्द', en: 'Cancel', mai: 'रद्द', bho: 'रद्द' })}</span>
-              </button>
-              <button type="button" className="btn-cam-capture" onClick={capturePhoto} aria-label="capture">
-                <Camera size={26} />
-              </button>
-              <span className="cam-hint">{pick(language, { ne: 'फोटो खिच्नुहोस्', en: 'Take photo', mai: 'फोटो खींचू', bho: 'फोटो खींचीं' })}</span>
-            </div>
           </div>
         </div>
       )}

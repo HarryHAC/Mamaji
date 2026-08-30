@@ -90,7 +90,7 @@ export default function AIAgentOverlay() {
             }
           }}
           aria-label="AI voice assistant"
-          title={pick(language, { ne: 'बोलेर सामान अर्डर गर्नुहोस्', hi: 'बोलकर सामान ऑर्डर करें', en: 'Order groceries by voice', mai: 'बाजिकऽ अर्डर करू', bho: 'बोल के आर्डर करीं' })}
+          title={pick(language, { ne: 'बोलेर सामान अर्डर गर्नुहोस्', hi: 'बोलकर सामान ऑर्डर करें', en: 'Order by voice', mai: 'बाजिकऽ अर्डर करू', bho: 'बोल के आर्डर करीं' })}
         >
           {listeningDisplay && <div className="fab-ripple-ring"></div>}
           <div className="fab-icon-inner">

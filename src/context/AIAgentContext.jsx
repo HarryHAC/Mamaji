@@ -256,9 +256,12 @@ export function AIAgentProvider({ children }) {
       if (final.trim()) {
         const clean = final.trim();
         const avgConf = finalCount ? conf / finalCount : 0;
-        // Drop obvious background noise: 1-char blips, or a low-confidence tiny phrase.
+        // Drop only obvious background noise: single-character blips, or a 1–2
+        // char fragment the engine is very unsure about. IMPORTANT: never drop
+        // short confirmations like "हो"/"yes"/"हँ" just for low confidence —
+        // that used to silently break hands-free order confirmation.
         if (clean.length < 2) return;
-        if (avgConf > 0 && avgConf < 0.35 && clean.length < 6) return;
+        if (avgConf > 0 && avgConf < 0.2 && clean.length < 3) return;
 
         finalBufferRef.current = (finalBufferRef.current + ' ' + final).trim();
         // Debounce: wait briefly in case the sentence arrives in several pieces.

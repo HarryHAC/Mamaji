@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useApp } from './AppContext';
 import { useAuth } from './AuthContext';
-import { INITIAL_PRODUCTS, INITIAL_EXPENSES, GENERIC_PRODUCT_IMAGES } from '../constants/sampleData';
+import { INITIAL_PRODUCTS, INITIAL_EXPENSES, GENERIC_PRODUCT_IMAGES, PRODUCT_PLACEHOLDER_IMG } from '../constants/sampleData';
 import { soundEffects } from '../utils/audioAlerts';
 
 const ShopkeeperContext = createContext();
@@ -166,7 +166,7 @@ export function ShopkeeperProvider({ children }) {
       price: Number(newProduct.price) || 0,
       minStock: Number(newProduct.minStock) || 5,
       isAvailable: Number(newProduct.stock) > 0,
-      image: newProduct.image || GENERIC_PRODUCT_IMAGES[newProduct.aliasId] || GENERIC_PRODUCT_IMAGES.general
+      image: newProduct.image || PRODUCT_PLACEHOLDER_IMG
     };
     setProducts(prev => [created, ...prev]);
     showToast(`${created.nameNe} सामान थपियो!`);

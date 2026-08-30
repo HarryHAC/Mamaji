@@ -148,7 +148,7 @@ export function ShopAgentProvider({ children }) {
         const clean = final.trim();
         const avgConf = finalCount ? conf / finalCount : 0;
         if (clean.length < 2) return;
-        if (avgConf > 0 && avgConf < 0.35 && clean.length < 6) return;
+        if (avgConf > 0 && avgConf < 0.2 && clean.length < 3) return;
         finalBufferRef.current = (finalBufferRef.current + ' ' + final).trim();
         clearTimeout(processTimerRef.current);
         processTimerRef.current = setTimeout(() => {
