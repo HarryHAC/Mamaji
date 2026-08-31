@@ -426,15 +426,35 @@ export default function InventoryManager() {
                     value={unit}
                     onChange={(e) => setUnit(e.target.value)}
                   >
-                    <option value="kg">kg (किलो)</option>
-                    <option value="g">g (ग्राम)</option>
-                    <option value="litre">litre (लिटर)</option>
-                    <option value="ml">ml (मि.लि.)</option>
-                    <option value="packet">packet (प्याकेट)</option>
-                    <option value="piece">piece (वटा / पिस)</option>
-                    <option value="dozen">dozen (दर्जन)</option>
-                    <option value="bottle">bottle (बोतल)</option>
-                    <option value="box">box (बाकस / क्रेट)</option>
+                    <optgroup label={pick(language, { ne: 'तौल / नाप', hi: 'वज़न / मात्रा', en: 'Weight / Volume', mai: 'तौल / नाप', bho: 'तौल / नाप' })}>
+                      <option value="kg">kg ({pick(language, { ne: 'किलो', hi: 'किलो', en: 'kg', mai: 'किलो', bho: 'किलो' })})</option>
+                      <option value="g">g ({pick(language, { ne: 'ग्राम', hi: 'ग्राम', en: 'gram', mai: 'ग्राम', bho: 'ग्राम' })})</option>
+                      <option value="litre">litre ({pick(language, { ne: 'लिटर', hi: 'लीटर', en: 'litre', mai: 'लिटर', bho: 'लिटर' })})</option>
+                      <option value="ml">ml ({pick(language, { ne: 'मि.लि.', hi: 'मि.ली.', en: 'ml', mai: 'मि.लि.', bho: 'मि.लि.' })})</option>
+                      <option value="quintal">quintal ({pick(language, { ne: 'क्विन्टल', hi: 'क्विंटल', en: 'quintal', mai: 'क्विन्टल', bho: 'क्विंटल' })})</option>
+                    </optgroup>
+                    <optgroup label={pick(language, { ne: 'गन्ती', hi: 'गिनती', en: 'Count', mai: 'गिनती', bho: 'गिनती' })}>
+                      <option value="piece">piece ({pick(language, { ne: 'वटा / पिस', hi: 'नग / पीस', en: 'piece', mai: 'गो / पिस', bho: 'गो / पिस' })})</option>
+                      <option value="dozen">dozen ({pick(language, { ne: 'दर्जन', hi: 'दर्जन', en: 'dozen', mai: 'दर्जन', bho: 'दर्जन' })})</option>
+                      <option value="pair">pair ({pick(language, { ne: 'जोडी', hi: 'जोड़ी', en: 'pair', mai: 'जोड़ी', bho: 'जोड़ी' })})</option>
+                      <option value="set">set ({pick(language, { ne: 'सेट', hi: 'सेट', en: 'set', mai: 'सेट', bho: 'सेट' })})</option>
+                      <option value="unit">unit ({pick(language, { ne: 'नग', hi: 'नग', en: 'unit', mai: 'नग', bho: 'नग' })})</option>
+                    </optgroup>
+                    <optgroup label={pick(language, { ne: 'लम्बाइ', hi: 'लंबाई', en: 'Length', mai: 'लम्बाई', bho: 'लंबाई' })}>
+                      <option value="meter">meter ({pick(language, { ne: 'मिटर', hi: 'मीटर', en: 'meter', mai: 'मिटर', bho: 'मीटर' })})</option>
+                      <option value="foot">foot ({pick(language, { ne: 'फिट', hi: 'फुट', en: 'foot', mai: 'फिट', bho: 'फुट' })})</option>
+                      <option value="roll">roll ({pick(language, { ne: 'रोल', hi: 'रोल', en: 'roll', mai: 'रोल', bho: 'रोल' })})</option>
+                    </optgroup>
+                    <optgroup label={pick(language, { ne: 'प्याकिङ / थोक', hi: 'पैकिंग / थोक', en: 'Packing / Bulk', mai: 'पैकिंग / थोक', bho: 'पैकिंग / थोक' })}>
+                      <option value="packet">packet ({pick(language, { ne: 'प्याकेट', hi: 'पैकेट', en: 'packet', mai: 'पैकेट', bho: 'पैकेट' })})</option>
+                      <option value="bottle">bottle ({pick(language, { ne: 'बोतल', hi: 'बोतल', en: 'bottle', mai: 'बोतल', bho: 'बोतल' })})</option>
+                      <option value="box">box ({pick(language, { ne: 'बाकस / क्रेट', hi: 'बॉक्स / क्रेट', en: 'box / crate', mai: 'बक्सा / क्रेट', bho: 'बक्सा / क्रेट' })})</option>
+                      <option value="carton">carton ({pick(language, { ne: 'कार्टन', hi: 'कार्टन', en: 'carton', mai: 'कार्टन', bho: 'कार्टन' })})</option>
+                      <option value="sack">sack ({pick(language, { ne: 'बोरा', hi: 'बोरी', en: 'sack', mai: 'बोरा', bho: 'बोरा' })})</option>
+                    </optgroup>
+                    <optgroup label={pick(language, { ne: 'बिजुली', hi: 'बिजली', en: 'Electrical', mai: 'बिजली', bho: 'बिजली' })}>
+                      <option value="watt">watt ({pick(language, { ne: 'वाट', hi: 'वाट', en: 'watt', mai: 'वाट', bho: 'वाट' })})</option>
+                    </optgroup>
                   </select>
                 </div>
               </div>
