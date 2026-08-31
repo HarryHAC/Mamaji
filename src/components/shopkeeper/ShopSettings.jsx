@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useShopkeeper } from '../../context/ShopkeeperContext';
 import { useApp } from '../../context/AppContext';
 import { pick } from '../../utils/i18n';
+import { SHOP_TYPE_LIST } from '../../constants/shopTypes';
 import {
   Settings,
   Clock,
@@ -27,6 +28,11 @@ export default function ShopSettings() {
   const [ownerName, setOwnerName] = useState(shopData.ownerName);
   const [phone, setPhone] = useState(shopData.phone);
   const [address, setAddress] = useState(shopData.address);
+
+  // Shop type (drives the product categories) — changeable after registration.
+  const knownType = SHOP_TYPE_LIST.some(tp => tp.id === shopData.shopType);
+  const [shopType, setShopType] = useState(knownType ? shopData.shopType : (shopData.shopType ? 'other' : 'general'));
+  const [customType, setCustomType] = useState(shopData.shopTypeLabel || '');
 
   // Hours
   const [openingTime, setOpeningTime] = useState(shopData.openingTime || '06:00');
@@ -72,6 +78,8 @@ export default function ShopSettings() {
       ownerName,
       phone,
       address,
+      shopType: shopType === 'other' ? (customType.trim() || 'other') : shopType,
+      shopTypeLabel: shopType === 'other' ? customType.trim() : '',
       openingTime,
       closingTime,
       deliveryAvailable,
@@ -156,6 +164,53 @@ export default function ShopSettings() {
                 onChange={(e) => setAddress(e.target.value)}
               />
             </div>
+          </div>
+
+          {/* Shop type — changing this updates the product categories */}
+          <div className="settings-shoptype-block">
+            <label className="form-label">
+              {pick(language, { ne: 'पसलको प्रकार', hi: 'दुकान का प्रकार', en: 'Shop type', mai: 'दोकानक प्रकार', bho: 'दोकान के प्रकार' })}
+            </label>
+            <p className="hint-text">
+              {pick(language, {
+                ne: 'यसले सामानका कोटिहरू (जस्तै तरकारी, औजार, कपडा) निर्धारण गर्छ।',
+                hi: 'यह उत्पाद श्रेणियाँ (जैसे सब्ज़ी, औज़ार, कपड़े) तय करता है।',
+                en: 'This decides the product categories (e.g. vegetables, tools, clothing).',
+                mai: 'ई सामानक श्रेणी (जेना तरकारी, औजार, कपड़ा) तय करैत अछि।',
+                bho: 'ई सामान के श्रेणी (जइसे तरकारी, औजार, कपड़ा) तय करेला।'
+              })}
+            </p>
+            <div className="auth-shoptype-grid">
+              {SHOP_TYPE_LIST.map(tp => (
+                <button
+                  key={tp.id}
+                  type="button"
+                  className={`auth-shoptype-btn ${shopType === tp.id ? 'selected' : ''}`}
+                  onClick={() => setShopType(tp.id)}
+                >
+                  <span className="st-icon">{tp.icon}</span>
+                  <span className="st-name">{pick(language, tp.name)}</span>
+                </button>
+              ))}
+              <button
+                type="button"
+                className={`auth-shoptype-btn ${shopType === 'other' ? 'selected' : ''}`}
+                onClick={() => setShopType('other')}
+              >
+                <span className="st-icon">➕</span>
+                <span className="st-name">{pick(language, { ne: 'अन्य', hi: 'अन्य', en: 'Other', mai: 'अन्य', bho: 'अन्य' })}</span>
+              </button>
+            </div>
+            {shopType === 'other' && (
+              <input
+                type="text"
+                className="form-input"
+                placeholder={pick(language, { ne: 'पसलको प्रकार लेख्नुहोस्', hi: 'दुकान का प्रकार लिखें', en: 'Type your shop type', mai: 'दोकानक प्रकार लिखू', bho: 'दोकान के प्रकार लिखीं' })}
+                value={customType}
+                onChange={(e) => setCustomType(e.target.value)}
+                style={{ marginTop: '8px' }}
+              />
+            )}
           </div>
         </div>
 

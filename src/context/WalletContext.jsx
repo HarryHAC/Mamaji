@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { pick } from '../utils/i18n';
+
+// WalletProvider sits outside AppProvider, so it can't use useApp() for the
+// language — read the saved language directly instead.
+const lang = () => localStorage.getItem('apna_lang') || 'ne';
 
 /*
  * In-app wallet — Mama Ji's own payment system (no third-party gateway).
@@ -54,7 +59,7 @@ export function WalletProvider({ children }) {
     if (!uid || amt <= 0) return { success: false, error: 'invalid amount' };
     const w = readWallet(uid);
     w.balance += amt;
-    addTxn(w, 'load', amt, w.bank ? `${w.bank.name} बाट लोड` : 'बैंकबाट लोड');
+    addTxn(w, 'load', amt, `${w.bank ? w.bank.name + ' ' : ''}${pick(lang(), { ne: w.bank ? 'बाट लोड' : 'बैंकबाट लोड', hi: 'से लोड', en: 'loaded', mai: 'सँ लोड', bho: 'से लोड' })}`);
     writeWallet(uid, w);
     setWallet({ ...w });
     return { success: true };
@@ -68,7 +73,7 @@ export function WalletProvider({ children }) {
     if (!w.bank) return { success: false, error: 'no-bank' };
     if (w.balance < amt) return { success: false, error: 'insufficient' };
     w.balance -= amt;
-    addTxn(w, 'withdraw', amt, `${w.bank.name} मा झिकियो`);
+    addTxn(w, 'withdraw', amt, `${w.bank.name} ${pick(lang(), { ne: 'मा झिकियो', hi: 'में निकाला', en: 'withdrawn', mai: 'मे निकालल', bho: 'में निकालल' })}`);
     writeWallet(uid, w);
     setWallet({ ...w });
     return { success: true };
@@ -78,7 +83,7 @@ export function WalletProvider({ children }) {
     if (!uid) return { success: false };
     const w = readWallet(uid);
     w.bank = { name: bank.name || '', account: bank.account || '', holder: bank.holder || '' };
-    addTxn(w, 'link', 0, `${w.bank.name} लिङ्क गरियो`);
+    addTxn(w, 'link', 0, `${w.bank.name} ${pick(lang(), { ne: 'लिङ्क गरियो', hi: 'लिंक किया', en: 'linked', mai: 'लिंक भेल', bho: 'लिंक भइल' })}`);
     writeWallet(uid, w);
     setWallet({ ...w });
     return { success: true };
@@ -91,14 +96,14 @@ export function WalletProvider({ children }) {
     const payer = readWallet(uid);
     if (payer.balance < amt) return { success: false, error: 'insufficient' };
     payer.balance -= amt;
-    addTxn(payer, 'pay', amt, note || 'भुक्तानी');
+    addTxn(payer, 'pay', amt, note || pick(lang(), { ne: 'भुक्तानी', hi: 'भुगतान', en: 'Payment', mai: 'भुगतान', bho: 'भुगतान' }));
     writeWallet(uid, payer);
     setWallet({ ...payer });
     // Credit the payee's wallet (a shop owner) directly in their storage.
     if (toUid) {
       const payee = readWallet(toUid);
       payee.balance += amt;
-      addTxn(payee, 'receive', amt, note || 'ग्राहकबाट भुक्तानी');
+      addTxn(payee, 'receive', amt, note || pick(lang(), { ne: 'ग्राहकबाट भुक्तानी', hi: 'ग्राहक से भुगतान', en: 'Payment from customer', mai: 'ग्राहकसँ भुगतान', bho: 'ग्राहक से भुगतान' }));
       writeWallet(toUid, payee);
     }
     return { success: true };

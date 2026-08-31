@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { TRANSLATIONS } from '../constants/translations';
 import { INITIAL_SHOPS, INITIAL_PRODUCTS, INITIAL_ORDERS } from '../constants/sampleData';
 import { soundEffects } from '../utils/audioAlerts';
+import { pick } from '../utils/i18n';
 import { useAuth } from './AuthContext';
 
 const AppContext = createContext();
@@ -174,7 +175,7 @@ export function AppProvider({ children }) {
   // Place Order Action
   const placeOrder = (orderData) => {
     if (!selectedShop) {
-      showToast('कुनै पसल छानिएको छैन', 'error');
+      showToast(pick(language, { ne: 'कुनै पसल छानिएको छैन', hi: 'कोई दुकान नहीं चुनी गई', en: 'No shop selected', mai: 'कोनो दोकान नै चुनल गेल', bho: 'कवनो दोकान ना चुनल गइल' }), 'error');
       return null;
     }
     const newOrder = {

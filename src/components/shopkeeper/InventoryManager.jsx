@@ -65,6 +65,7 @@ export default function InventoryManager() {
   const [nameNe, setNameNe] = useState('');
   const [nameEn, setNameEn] = useState('');
   const [category, setCategory] = useState(firstCategoryId);
+  const [customCategory, setCustomCategory] = useState(''); // free-text when category === '__custom__'
   const [price, setPrice] = useState('');
   const [unit, setUnit] = useState('kg');
   const [stock, setStock] = useState('');
@@ -85,6 +86,7 @@ export default function InventoryManager() {
     setNameNe('');
     setNameEn('');
     setCategory(firstCategoryId);
+    setCustomCategory('');
     setPrice('');
     setUnit('kg');
     setStock('20');
@@ -98,7 +100,11 @@ export default function InventoryManager() {
     setEditingProductId(p.id);
     setNameNe(p.nameNe);
     setNameEn(p.nameEn);
-    setCategory(p.category);
+    // If the product's category isn't one of this shop-type's presets, treat it
+    // as a custom category so the owner can keep/edit it.
+    const isKnown = CATEGORIES.some(c => c.id === p.category);
+    setCategory(isKnown ? p.category : '__custom__');
+    setCustomCategory(isKnown ? '' : (p.category || ''));
     setPrice(String(p.price));
     setUnit(p.unit);
     setStock(String(p.stock));
@@ -131,12 +137,16 @@ export default function InventoryManager() {
     if (!nameNe.trim() || !price) return;
 
     const finalImage = image || PLACEHOLDER_IMG;
+    // Custom category → use the typed text (fall back to the first preset).
+    const finalCategory = category === '__custom__'
+      ? (customCategory.trim() || firstCategoryId)
+      : category;
 
     if (editingProductId) {
       editProduct(editingProductId, {
         nameNe,
         nameEn: nameEn || nameNe,
-        category,
+        category: finalCategory,
         price: Number(price),
         unit,
         stock: Number(stock),
@@ -148,7 +158,7 @@ export default function InventoryManager() {
       addProduct({
         nameNe,
         nameEn: nameEn || nameNe,
-        category,
+        category: finalCategory,
         price: Number(price),
         unit,
         stock: Number(stock),
@@ -368,7 +378,20 @@ export default function InventoryManager() {
                         {pick(language, c.name)}
                       </option>
                     ))}
+                    <option value="__custom__">
+                      ➕ {pick(language, { ne: 'अन्य / नयाँ कोटि', hi: 'अन्य / नई श्रेणी', en: 'Other / new category', mai: 'अन्य / नव श्रेणी', bho: 'अन्य / नया श्रेणी' })}
+                    </option>
                   </select>
+                  {category === '__custom__' && (
+                    <input
+                      type="text"
+                      className="form-input"
+                      style={{ marginTop: '6px' }}
+                      placeholder={pick(language, { ne: 'कोटिको नाम लेख्नुहोस्', hi: 'श्रेणी का नाम लिखें', en: 'Type category name', mai: 'श्रेणीक नाम लिखू', bho: 'श्रेणी के नाम लिखीं' })}
+                      value={customCategory}
+                      onChange={(e) => setCustomCategory(e.target.value)}
+                    />
+                  )}
                 </div>
                 <div className="form-group">
                   <label className="form-label">{pick(language, { ne: 'ब्रान्ड / कम्पनी (ऐच्छिक)', hi: 'ब्रांड / कंपनी (वैकल्पिक)', en: 'Brand / Company (optional)', mai: 'ब्रान्ड / कम्पनी (ऐच्छिक)', bho: 'ब्रांड / कंपनी (वैकल्पिक)' })}</label>

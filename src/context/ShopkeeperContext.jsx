@@ -3,6 +3,7 @@ import { useApp } from './AppContext';
 import { useAuth } from './AuthContext';
 import { INITIAL_PRODUCTS, INITIAL_EXPENSES, GENERIC_PRODUCT_IMAGES, PRODUCT_PLACEHOLDER_IMG } from '../constants/sampleData';
 import { soundEffects } from '../utils/audioAlerts';
+import { pick } from '../utils/i18n';
 
 const ShopkeeperContext = createContext();
 
@@ -48,7 +49,7 @@ function makeShopForOwner(user) {
 }
 
 export function ShopkeeperProvider({ children }) {
-  const { shops, setShops, orders, setOrders, showToast, t } = useApp();
+  const { shops, setShops, orders, setOrders, showToast, t, language } = useApp();
   const { currentUser } = useAuth();
 
   // The shop the owner manages (their own; no demo shops any more).
@@ -169,7 +170,7 @@ export function ShopkeeperProvider({ children }) {
       image: newProduct.image || PRODUCT_PLACEHOLDER_IMG
     };
     setProducts(prev => [created, ...prev]);
-    showToast(`${created.nameNe} सामान थपियो!`);
+    showToast(`${created.nameNe} ${pick(language, { ne: 'सामान थपियो!', hi: 'सामान जोड़ा गया!', en: 'added!', mai: 'सामान जोड़ल गेल!', bho: 'सामान जोड़ाइल!' })}`);
     return created;
   };
 
@@ -186,7 +187,7 @@ export function ShopkeeperProvider({ children }) {
       }
       return p;
     }));
-    showToast('सामानको विवरण सच्याइयो!');
+    showToast(pick(language, { ne: 'सामानको विवरण सच्याइयो!', hi: 'सामान की जानकारी अपडेट हुई!', en: 'Product details updated!', mai: 'सामानक विवरण अपडेट भेल!', bho: 'सामान के जानकारी अपडेट भइल!' }));
   };
 
   // Toggle a product available/unavailable independently of stock, so the
@@ -201,13 +202,16 @@ export function ShopkeeperProvider({ children }) {
       }
       return p;
     }));
-    showToast(nowAvailable ? 'सामान अब उपलब्ध छ ✅' : 'सामान अनुपलब्ध बनाइयो ⛔', nowAvailable ? 'success' : 'info');
+    showToast(nowAvailable
+      ? pick(language, { ne: 'सामान अब उपलब्ध छ ✅', hi: 'सामान अब उपलब्ध है ✅', en: 'Item now available ✅', mai: 'सामान आब उपलब्ध अछि ✅', bho: 'सामान अब उपलब्ध बा ✅' })
+      : pick(language, { ne: 'सामान अनुपलब्ध बनाइयो ⛔', hi: 'सामान अनुपलब्ध कर दिया ⛔', en: 'Item marked unavailable ⛔', mai: 'सामान अनुपलब्ध बनाओल गेल ⛔', bho: 'सामान अनुपलब्ध बनावल गइल ⛔' }),
+      nowAvailable ? 'success' : 'info');
   };
 
   // Delete product
   const deleteProduct = (id) => {
     setProducts(prev => prev.filter(p => p.id !== id));
-    showToast('सामान हटाइयो!', 'info');
+    showToast(pick(language, { ne: 'सामान हटाइयो!', hi: 'सामान हटाया गया!', en: 'Item removed!', mai: 'सामान हटाओल गेल!', bho: 'सामान हटावल गइल!' }), 'info');
   };
 
   // Quick Stock update
@@ -237,7 +241,7 @@ export function ShopkeeperProvider({ children }) {
       }
       return o;
     }));
-    showToast(`अर्डर स्थिति परिवर्तन गरियो: ${newStatus}`);
+    showToast(`${pick(language, { ne: 'अर्डर स्थिति परिवर्तन गरियो', hi: 'ऑर्डर स्थिति बदली गई', en: 'Order status changed', mai: 'अर्डर स्थिति बदलल गेल', bho: 'आर्डर स्थिति बदलल गइल' })}: ${newStatus}`);
   };
 
   const assignRiderToOrder = (orderId, riderName) => {
@@ -250,7 +254,7 @@ export function ShopkeeperProvider({ children }) {
       }
       return o;
     }));
-    showToast(`डेलिभरी तोकियो: ${riderName}`);
+    showToast(`${pick(language, { ne: 'डेलिभरी तोकियो', hi: 'डिलीवरी सौंपी गई', en: 'Delivery assigned', mai: 'डेलिभरी सौंपल गेल', bho: 'डेलिभरी सौंपल गइल' })}: ${riderName}`);
   };
 
   const rejectOrder = (orderId) => {
@@ -264,7 +268,7 @@ export function ShopkeeperProvider({ children }) {
       }
       return o;
     }));
-    showToast('अर्डर अस्वीकृत गरियो!', 'error');
+    showToast(pick(language, { ne: 'अर्डर अस्वीकृत गरियो!', hi: 'ऑर्डर अस्वीकार किया गया!', en: 'Order rejected!', mai: 'अर्डर अस्वीकृत भेल!', bho: 'आर्डर अस्वीकार भइल!' }), 'error');
   };
 
   // Add expense in Khata
@@ -278,18 +282,21 @@ export function ShopkeeperProvider({ children }) {
       category
     };
     setExpenses(prev => [newExp, ...prev]);
-    showToast('खर्च खातामा जोडिएको छ!');
+    showToast(pick(language, { ne: 'खर्च खातामा जोडिएको छ!', hi: 'खर्च खाते में जोड़ा गया!', en: 'Expense added to the ledger!', mai: 'खर्च खातामे जोड़ल गेल!', bho: 'खरचा खाता में जोड़ाइल!' }));
   };
 
   // Update Shop & Delivery Settings
   const updateShopSettings = (updatedSettings) => {
+    // Target this owner's shop by activeShopId, falling back to the resolved
+    // shopData.id / ownerId so the update never silently no-ops.
+    const targetId = activeShopId || shopData?.id;
     setShops(prevShops => prevShops.map(s => {
-      if (s.id === activeShopId) {
+      if (s.id === targetId || (currentUser && s.ownerId === currentUser.id)) {
         return { ...s, ...updatedSettings };
       }
       return s;
     }));
-    showToast('पसल सेटिङ सुरक्षित गरियो!');
+    showToast(pick(language, { ne: 'पसल सेटिङ सुरक्षित गरियो!', hi: 'दुकान सेटिंग सहेजी गई!', en: 'Shop settings saved!', mai: 'दोकान सेटिंग सुरक्षित भेल!', bho: 'दोकान सेटिंग सेव भइल!' }));
   };
 
   // AI Product Image suggester
