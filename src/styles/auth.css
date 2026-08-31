@@ -210,22 +210,15 @@
 }
 .auth-forgot-title { font-size: 19px; font-weight: 800; color: var(--text-main); }
 .auth-forgot-sub { font-size: 12.5px; color: var(--text-muted); line-height: 1.45; max-width: 300px; }
-.auth-otp-demo {
-  display: flex; align-items: flex-start; gap: 9px;
-  background: var(--accent-saffron-light, #FFF7ED);
-  border: 1px dashed var(--accent-saffron, #F59E0B);
+.auth-otp-sent {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: var(--primary-light);
+  border: 1px solid var(--primary);
   border-radius: var(--radius-sm);
-  padding: 10px 11px;
-  color: var(--text-main);
-}
-.auth-otp-demo strong { display: block; font-size: 13.5px; font-weight: 700; }
-.auth-otp-demo small { display: block; font-size: 10.5px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
-.auth-otp-code {
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 18px; font-weight: 900;
-  letter-spacing: 3px;
+  padding: 9px 11px;
   color: var(--primary-dark);
 }
+.auth-otp-sent small { font-size: 11.5px; line-height: 1.4; }
 .auth-resend-link {
   border: none; background: transparent;
   color: var(--primary); font-weight: 700; font-size: 12.5px;

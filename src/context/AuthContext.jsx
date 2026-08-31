@@ -43,16 +43,12 @@ const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 const isPhone = (v) => /^(\+?977[- ]?)?9\d{9}$/.test(String(v).replace(/[\s-]/g, ''));
 const normalizePhone = (v) => String(v).replace(/[\s-]/g, '').replace(/^\+?977/, '');
 
-// ── Password-reset OTP (demo) ──
-// NOTE: With no backend we cannot actually send an SMS or email, so the OTP is
-// generated + verified locally and shown on-screen (clearly labelled a demo).
-// In production, requestPasswordReset() would POST to a server that sends the
-// code over SMS/email and verification would happen server-side.
-const OTP_TTL_MS = 5 * 60 * 1000;   // codes expire after 5 minutes
-const OTP_MAX_ATTEMPTS = 5;         // lock the code after too many wrong tries
-const otpKey = (uid) => `apna_pwreset_${uid}`;
-
-const genOtp = () => String(Math.floor(100000 + Math.random() * 900000)); // 6 digits
+// ── Password-reset OTP (real delivery) ──
+// The OTP is generated, signed, and verified by the serverless function at
+// /api/otp (which sends it over email via Resend and/or SMS via Twilio). The
+// browser never sees the code — it only holds a signed token between the two
+// steps. See api/otp.js for the required environment variables.
+const OTP_ENDPOINT = '/api/otp';
 
 const maskPhone = (p) => (!p ? '' : (p.length > 4 ? p.slice(0, 2) + '****' + p.slice(-2) : p));
 const maskEmail = (e) => {
@@ -199,69 +195,93 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(SESSION_KEY);
   }, []);
 
-  // ── Forgot password: step 1 — generate + "send" an OTP ──
-  // Finds the account, creates a 6-digit code (5-min expiry) and returns the
-  // channels it was delivered to (phone / email / both). Since there is no
-  // backend, `demoOtp` is returned so the UI can display it.
-  const requestPasswordReset = useCallback(({ identifier }) => {
+  // ── Forgot password: step 1 — ask the server to send a real OTP ──
+  // Finds the account locally, then calls /api/otp which generates the code,
+  // emails/SMSes it, and returns a signed token (never the code). The token +
+  // expiry are handed back to the caller to hold until verification.
+  const requestPasswordReset = useCallback(async ({ identifier }) => {
     const user = findUserByIdentifier(identifier);
     if (!user) {
       return { success: false, error: 'यो फोन/इमेलमा खाता भेटिएन / No account found for that phone/email.' };
     }
-
-    // Deliver to every contact on file for this account.
-    const destinations = [];
-    if (user.phone) destinations.push({ channel: 'phone', value: user.phone, masked: maskPhone(user.phone) });
-    if (user.email) destinations.push({ channel: 'email', value: user.email, masked: maskEmail(user.email) });
-    if (destinations.length === 0) {
+    if (!user.phone && !user.email) {
       return { success: false, error: 'यो खातामा फोन/इमेल छैन / This account has no phone or email on file.' };
     }
 
-    const otp = genOtp();
+    let data;
     try {
-      localStorage.setItem(otpKey(user.id), JSON.stringify({
-        otp, expiresAt: Date.now() + OTP_TTL_MS, attempts: 0
-      }));
-    } catch (e) { /* ignore quota */ }
+      const r = await fetch(OTP_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send', phone: user.phone || '', email: user.email || '' })
+      });
+      data = await r.json().catch(() => ({}));
+      if (!r.ok || !data.ok) {
+        const err = data && data.error;
+        const msg = err === 'service_not_configured'
+          ? 'OTP सेवा अझै सक्रिय छैन (एडमिनले सर्भरमा RESEND/TWILIO कुञ्जी राख्नुपर्छ) / OTP service is not set up yet (admin must add the RESEND/TWILIO keys).'
+          : err === 'too_many_requests'
+            ? 'धेरै पटक प्रयास भयो, केही बेरमा फेरि गर्नुहोस् / Too many requests, try again shortly.'
+            : 'OTP पठाउन सकिएन, फेरि प्रयास गर्नुहोस् / Could not send the OTP. Please try again.';
+        return { success: false, error: msg };
+      }
+    } catch (e) {
+      return { success: false, error: 'नेटवर्क समस्या — इन्टरनेट जाँच्नुहोस् / Network error. Check your connection and try again.' };
+    }
 
-    logActivity(user.id, 'password_reset_requested', destinations.map(d => d.channel).join('+'));
-    return { success: true, userId: user.id, destinations, demoOtp: otp, ttlMinutes: OTP_TTL_MS / 60000 };
+    // Which contacts actually received it (server tells us the channels).
+    const sentChannels = data.channels || [];
+    const destinations = [];
+    if (user.email && sentChannels.includes('email')) destinations.push({ channel: 'email', masked: maskEmail(user.email) });
+    if (user.phone && sentChannels.includes('sms')) destinations.push({ channel: 'phone', masked: maskPhone(user.phone) });
+    if (destinations.length === 0) {
+      // Fallback label if the server didn't report channels for some reason.
+      if (user.email) destinations.push({ channel: 'email', masked: maskEmail(user.email) });
+      if (user.phone) destinations.push({ channel: 'phone', masked: maskPhone(user.phone) });
+    }
+
+    logActivity(user.id, 'password_reset_requested', sentChannels.join('+'));
+    return { success: true, token: data.token, expiry: data.expiry, destinations };
   }, [logActivity]);
 
-  // ── Forgot password: step 2 — verify the OTP and set a new password ──
-  const resetPasswordWithOtp = useCallback(({ identifier, otp, newPassword }) => {
+  // ── Forgot password: step 2 — verify the OTP (server) and set the password ──
+  const resetPasswordWithOtp = useCallback(async ({ identifier, otp, newPassword, token, expiry }) => {
     const user = findUserByIdentifier(identifier);
     if (!user) {
       return { success: false, error: 'खाता भेटिएन / Account not found.' };
     }
-    let rec;
-    try { rec = JSON.parse(localStorage.getItem(otpKey(user.id)) || 'null'); } catch (e) { rec = null; }
-    if (!rec) {
+    if (!token || !expiry) {
       return { success: false, error: 'पहिले OTP माग्नुहोस् / Request an OTP first.' };
-    }
-    if (Date.now() > rec.expiresAt) {
-      localStorage.removeItem(otpKey(user.id));
-      return { success: false, error: 'OTP को समय सकियो, फेरि माग्नुहोस् / OTP expired. Please request a new one.' };
-    }
-    if (rec.attempts >= OTP_MAX_ATTEMPTS) {
-      localStorage.removeItem(otpKey(user.id));
-      return { success: false, error: 'धेरै पटक गलत भयो, नयाँ OTP माग्नुहोस् / Too many attempts. Request a new OTP.' };
-    }
-    if (String(otp || '').trim() !== rec.otp) {
-      rec.attempts += 1;
-      try { localStorage.setItem(otpKey(user.id), JSON.stringify(rec)); } catch (e) { /* ignore */ }
-      const left = OTP_MAX_ATTEMPTS - rec.attempts;
-      return { success: false, error: `OTP मिलेन (${left} पटक बाँकी) / Incorrect OTP (${left} left).` };
     }
     if (!newPassword || newPassword.length < 4) {
       return { success: false, error: 'कम्तिमा ४ अक्षरको नयाँ पासवर्ड / New password must be at least 4 characters.' };
     }
 
-    // Success — update the password and clear the code.
+    let data;
+    try {
+      const r = await fetch(OTP_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify', otp, token, expiry, phone: user.phone || '', email: user.email || '' })
+      });
+      data = await r.json().catch(() => ({}));
+    } catch (e) {
+      return { success: false, error: 'नेटवर्क समस्या / Network error. Please try again.' };
+    }
+
+    if (!data.valid) {
+      const msg = data.error === 'expired'
+        ? 'OTP को समय सकियो, फेरि माग्नुहोस् / OTP expired. Please request a new one.'
+        : data.error === 'too_many_requests'
+          ? 'धेरै पटक प्रयास भयो, केही बेरमा फेरि गर्नुहोस् / Too many attempts, try again shortly.'
+          : 'OTP मिलेन / Incorrect OTP.';
+      return { success: false, error: msg };
+    }
+
+    // Verified — update the password locally (accounts live in this browser).
     const merged = { ...user, passwordHash: hashPassword(newPassword) };
     const next = loadUsers().map(u => (u.id === user.id ? merged : u));
     persistUsers(next);
-    localStorage.removeItem(otpKey(user.id));
     logActivity(user.id, 'password_reset', '');
     return { success: true };
   }, [persistUsers, logActivity]);

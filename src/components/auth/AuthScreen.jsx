@@ -30,7 +30,8 @@ export default function AuthScreen() {
   const [otpInput, setOtpInput] = useState('');
   const [newPw, setNewPw] = useState('');
   const [resetDest, setResetDest] = useState([]); // [{channel, masked}]
-  const [demoOtp, setDemoOtp] = useState('');      // shown because there is no SMS/email backend
+  const [resetToken, setResetToken] = useState(''); // signed token from the server (not the OTP)
+  const [resetExpiry, setResetExpiry] = useState(0);
   const [info, setInfo] = useState('');            // success / status message
 
   const captureLocation = async () => {
@@ -53,8 +54,7 @@ export default function AuthScreen() {
     'तपाईंलाई पठाइएको ६-अंकको OTP र नयाँ पासवर्ड हाल्नुहोस्।': 'आपको भेजा गया 6-अंकों का OTP और नया पासवर्ड डालें।',
     'फोन नम्बर वा इमेल': 'फोन नंबर या ईमेल',
     'OTP पठाउनुहोस्': 'OTP भेजें',
-    'डेमो OTP:': 'डेमो OTP:',
-    'यो डेमो हो — वास्तविक SMS/इमेल पठाइँदैन। वास्तविक प्रयोगमा यो कोड तपाईंको फोन/इमेलमा जान्छ।': 'यह डेमो है — असली SMS/ईमेल नहीं भेजा जाता। असली उपयोग में यह कोड आपके फोन/ईमेल पर जाता है।',
+    'तपाईंको फोन/इमेलमा पठाइएको ६-अंकको कोड यहाँ हाल्नुहोस्। (५ मिनेटमा सकिन्छ)': 'अपने फोन/ईमेल पर भेजा गया 6-अंकों का कोड यहाँ डालें। (5 मिनट में समाप्त)',
     '६-अंकको OTP': '6-अंकों का OTP',
     'नयाँ पासवर्ड': 'नया पासवर्ड',
     'पासवर्ड बदल्नुहोस्': 'पासवर्ड बदलें',
@@ -78,6 +78,7 @@ export default function AuthScreen() {
     'दर्ता गर्नुहोस्': 'रजिस्टर करें',
     'नयाँ OTP पठाइयो।': 'नया OTP भेजा गया।',
     'पासवर्ड बदलियो! अब नयाँ पासवर्डले लगइन गर्नुहोस्।': 'पासवर्ड बदल गया! अब नए पासवर्ड से लॉगिन करें।',
+    'पासवर्ड बिर्से OTP फोन वा इमेलमा पठाइन्छ।': 'पासवर्ड भूल गए? OTP आपके फोन या ईमेल पर भेजा जाता है।',
   };
   const L = (nep, eng) => {
     if (language === 'en') return eng;
@@ -101,49 +102,57 @@ export default function AuthScreen() {
   const switchMode = (next) => {
     setMode(next);
     setError(''); setInfo('');
-    setForgotStep(0); setOtpInput(''); setNewPw(''); setDemoOtp(''); setResetDest([]);
+    setForgotStep(0); setOtpInput(''); setNewPw(''); setResetToken(''); setResetExpiry(0); setResetDest([]);
   };
 
-  // Forgot step 1 — request an OTP for the given phone/email.
-  const handleSendOtp = (e) => {
+  const sentToLabel = (destinations) => {
+    const where = destinations.map(d => d.masked).join(ne ? ' र ' : ' & ');
+    return language === 'en' ? `OTP sent to: ${where}`
+      : language === 'hi' ? `OTP भेजा गया: ${where}`
+      : `OTP पठाइयो: ${where}`;
+  };
+
+  // Forgot step 1 — ask the server to send a real OTP.
+  const handleSendOtp = async (e) => {
     e.preventDefault();
     setError(''); setInfo('');
     setBusy(true);
-    const res = requestPasswordReset({ identifier });
+    const res = await requestPasswordReset({ identifier });
     setBusy(false);
     if (!res.success) { setError(res.error); return; }
     setResetDest(res.destinations);
-    setDemoOtp(res.demoOtp);
+    setResetToken(res.token);
+    setResetExpiry(res.expiry);
     setForgotStep(1);
-    const where = res.destinations.map(d => d.masked).join(ne ? ' र ' : ' & ');
-    setInfo(language === 'en' ? `OTP sent to: ${where}`
-      : language === 'hi' ? `OTP भेजा गया: ${where}`
-      : `OTP पठाइयो: ${where}`);
+    setInfo(sentToLabel(res.destinations));
   };
 
-  // Forgot step 2 — verify OTP and set the new password.
-  const handleResetPassword = (e) => {
+  // Forgot step 2 — verify OTP (server) and set the new password.
+  const handleResetPassword = async (e) => {
     e.preventDefault();
     setError(''); setInfo('');
     setBusy(true);
-    const res = resetPasswordWithOtp({ identifier, otp: otpInput, newPassword: newPw });
+    const res = await resetPasswordWithOtp({ identifier, otp: otpInput, newPassword: newPw, token: resetToken, expiry: resetExpiry });
     setBusy(false);
     if (!res.success) { setError(res.error); return; }
     // Success — send the user back to login with their new password.
     setMode('login');
-    setForgotStep(0); setOtpInput(''); setNewPw(''); setDemoOtp(''); setResetDest([]);
+    setForgotStep(0); setOtpInput(''); setNewPw(''); setResetToken(''); setResetExpiry(0); setResetDest([]);
     setPassword('');
     setInfo(L('पासवर्ड बदलियो! अब नयाँ पासवर्डले लगइन गर्नुहोस्।',
               'Password changed! Log in with your new password.'));
   };
 
-  const resendOtp = () => {
-    const res = requestPasswordReset({ identifier });
+  const resendOtp = async () => {
+    setError('');
+    setBusy(true);
+    const res = await requestPasswordReset({ identifier });
+    setBusy(false);
     if (res.success) {
-      setDemoOtp(res.demoOtp);
+      setResetToken(res.token);
+      setResetExpiry(res.expiry);
       setResetDest(res.destinations);
       setOtpInput('');
-      setError('');
       setInfo(L('नयाँ OTP पठाइयो।', 'A new OTP has been sent.'));
     } else {
       setError(res.error);
@@ -229,17 +238,12 @@ export default function AuthScreen() {
               <form className="auth-form" onSubmit={handleResetPassword}>
                 {info && <div className="auth-info">{info}</div>}
 
-                {/* Demo notice — no SMS/email backend, so the code is shown here. */}
-                {demoOtp && (
-                  <div className="auth-otp-demo">
-                    <ShieldCheck size={16} />
-                    <div>
-                      <strong>{L('डेमो OTP:', 'Demo OTP:')} <span className="auth-otp-code">{demoOtp}</span></strong>
-                      <small>{L('यो डेमो हो — वास्तविक SMS/इमेल पठाइँदैन। वास्तविक प्रयोगमा यो कोड तपाईंको फोन/इमेलमा जान्छ।',
-                                 'This is a demo — no real SMS/email is sent. In production this code is delivered to your phone/email.')}</small>
-                    </div>
-                  </div>
-                )}
+                {/* The real code was delivered to the user's phone/email. */}
+                <div className="auth-otp-sent">
+                  <ShieldCheck size={16} />
+                  <small>{L('तपाईंको फोन/इमेलमा पठाइएको ६-अंकको कोड यहाँ हाल्नुहोस्। (५ मिनेटमा सकिन्छ)',
+                            'Enter the 6-digit code sent to your phone/email. (Expires in 5 minutes)')}</small>
+                </div>
 
                 <div className="auth-field">
                   <KeyRound size={18} className="auth-field-icon" />
@@ -450,8 +454,8 @@ export default function AuthScreen() {
         )}
 
         <p className="auth-demo-note">
-          {L('सुरक्षाको लागि, वास्तविक प्रयोगमा फोन OTP प्रयोग हुन्छ।',
-             'For your security, real deployments use phone OTP verification.')}
+          {L('पासवर्ड बिर्से OTP फोन वा इमेलमा पठाइन्छ।',
+             'Forgot your password? An OTP is sent to your phone or email.')}
         </p>
       </div>
     </div>

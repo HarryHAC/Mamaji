@@ -1,8 +1,8 @@
 node_modules/
 dist/
+.vercel/
+.vercel
+# Secrets — ignore all .env files EXCEPT the committed template
 .env
 .env.*
 !.env.example
-.vercel/
-.vercel
-.env*
