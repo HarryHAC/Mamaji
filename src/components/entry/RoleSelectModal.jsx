@@ -1,10 +1,11 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
+import { pick } from '../../utils/i18n';
 import LanguagePicker from '../common/LanguagePicker';
 import { ShoppingBag, Store, Sparkles, MapPin } from 'lucide-react';
 
 export default function RoleSelectModal() {
-  const { setRole, t } = useApp();
+  const { setRole, t, language } = useApp();
 
   return (
     <div className="role-entry-container">
@@ -40,9 +41,13 @@ export default function RoleSelectModal() {
               <span className="role-badge">{t.customer}</span>
               <h2 className="role-main-text">{t.customerTag}</h2>
               <p className="role-desc">
-                {t.appName === 'Mama Ji' 
-                  ? 'Order groceries easily by voice or tap' 
-                  : 'आलु, चामल, चिनी, तेल आदि बोलेर वा छानेर अर्डर गर्नुहोस्'}
+                {pick(language, {
+                  ne: 'सामान बोलेर वा छानेर सजिलै अर्डर गर्नुहोस्',
+                  hi: 'सामान बोलकर या चुनकर आसानी से ऑर्डर करें',
+                  en: 'Order items easily by voice or tap',
+                  mai: 'सामान बाजिकऽ वा चुनिकऽ सहजे अर्डर करू',
+                  bho: 'सामान बोल के भा चुन के आसानी से आर्डर करीं'
+                })}
               </p>
             </div>
             <div className="role-arrow">→</div>
@@ -61,9 +66,13 @@ export default function RoleSelectModal() {
               <span className="role-badge shop">{t.shopkeeper}</span>
               <h2 className="role-main-text">{t.shopkeeperTag}</h2>
               <p className="role-desc">
-                {t.appName === 'Mama Ji'
-                  ? 'Manage stock, live orders, delivery & daily Khata'
-                  : 'स्टक, अर्डर, डेलिभरी र आजको दैनिक खाता चलाउनुहोस्'}
+                {pick(language, {
+                  ne: 'स्टक, अर्डर, डेलिभरी र आजको दैनिक खाता चलाउनुहोस्',
+                  hi: 'स्टॉक, ऑर्डर, डिलीवरी और रोज़ का खाता संभालें',
+                  en: 'Manage stock, live orders, delivery & daily Khata',
+                  mai: 'स्टक, अर्डर, डेलिभरी आ रोजक खाता चलाबू',
+                  bho: 'स्टॉक, आर्डर, डेलिभरी आ रोज के खाता चलाईं'
+                })}
               </p>
             </div>
             <div className="role-arrow">→</div>
@@ -73,10 +82,10 @@ export default function RoleSelectModal() {
         {/* Feature Highlights Footer */}
         <div className="role-footer-pills">
           <div className="pill">
-            <Sparkles size={14} /> <span>एआई भ्वाइस अर्डर</span>
+            <Sparkles size={14} /> <span>{pick(language, { ne: 'एआई भ्वाइस अर्डर', hi: 'एआई वॉइस ऑर्डर', en: 'AI voice order', mai: 'एआई भ्वाइस अर्डर', bho: 'एआई भ्वाइस आर्डर' })}</span>
           </div>
           <div className="pill">
-            <MapPin size={14} /> <span>नजिकको पसल</span>
+            <MapPin size={14} /> <span>{pick(language, { ne: 'नजिकको पसल', hi: 'पास की दुकान', en: 'Nearby shops', mai: 'नजदीकक दोकान', bho: 'नजदीक के दोकान' })}</span>
           </div>
           <div className="pill">
             <span>eSewa / Khalti / COD</span>

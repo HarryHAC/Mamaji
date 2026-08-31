@@ -1,6 +1,7 @@
 import React from 'react';
 import { useShopkeeper } from '../../context/ShopkeeperContext';
 import { useApp } from '../../context/AppContext';
+import { pick } from '../../utils/i18n';
 import { toDevanagariNumerals } from '../../utils/deliveryCalculator';
 import {
   TrendingUp,
@@ -24,7 +25,7 @@ export default function ShopDashboard({ onNavigateTab }) {
     onlineSales,
     netProfit
   } = useShopkeeper();
-  const { t } = useApp();
+  const { t, language } = useApp();
 
   const pendingOrders = shopOrders.filter(
     o => o.orderStatus === 'received' || o.orderStatus === 'accepted' || o.orderStatus === 'preparing'
@@ -60,7 +61,7 @@ export default function ShopDashboard({ onNavigateTab }) {
               रु {toDevanagariNumerals(totalSales)}
             </h3>
             <span className="stat-sub">
-              नगद: रु {toDevanagariNumerals(cashSales)} | अनलाइन: रु {toDevanagariNumerals(onlineSales)}
+              {pick(language, { ne: 'नगद', hi: 'नगद', en: 'Cash', mai: 'नगद', bho: 'नगद' })}: रु {toDevanagariNumerals(cashSales)} | {pick(language, { ne: 'अनलाइन', hi: 'ऑनलाइन', en: 'Online', mai: 'अनलाइन', bho: 'अनलाइन' })}: रु {toDevanagariNumerals(onlineSales)}
             </span>
           </div>
         </div>
@@ -73,7 +74,7 @@ export default function ShopDashboard({ onNavigateTab }) {
           <div className="stat-meta">
             <span className="stat-label">{t.todayOrders}</span>
             <h3 className="stat-number">{toDevanagariNumerals(shopOrders.length)}</h3>
-            <span className="stat-sub">कुल ग्राहक अर्डर</span>
+            <span className="stat-sub">{pick(language, { ne: 'कुल ग्राहक अर्डर', hi: 'कुल ग्राहक ऑर्डर', en: 'Total customer orders', mai: 'कुल ग्राहक अर्डर', bho: 'कुल ग्राहक आर्डर' })}</span>
           </div>
         </div>
 
@@ -87,7 +88,7 @@ export default function ShopDashboard({ onNavigateTab }) {
             <h3 className="stat-number text-orange">
               {toDevanagariNumerals(pendingOrders.length)}
             </h3>
-            <span className="stat-sub">तयारी तथा डेलिभरी बाँकी</span>
+            <span className="stat-sub">{pick(language, { ne: 'तयारी तथा डेलिभरी बाँकी', hi: 'तैयारी व डिलीवरी बाकी', en: 'Preparing & delivery pending', mai: 'तैयारी आ डेलिभरी बाँकी', bho: 'तैयारी आ डेलिभरी बाकी' })}</span>
           </div>
         </div>
 
@@ -101,7 +102,7 @@ export default function ShopDashboard({ onNavigateTab }) {
             <h3 className="stat-number text-red">
               {toDevanagariNumerals(lowStockProducts.length)}
             </h3>
-            <span className="stat-sub">तत्काल थप्नुपर्ने सामान</span>
+            <span className="stat-sub">{pick(language, { ne: 'तत्काल थप्नुपर्ने सामान', hi: 'तुरंत भरने वाला सामान', en: 'Items to restock soon', mai: 'तुरंत भरय बला सामान', bho: 'तुरंत भरे वाला सामान' })}</span>
           </div>
         </div>
       </div>
@@ -116,13 +117,13 @@ export default function ShopDashboard({ onNavigateTab }) {
               {lowStockProducts.map(p => `${p.nameNe} (${p.stock} ${p.unit})`).join(', ')}
             </p>
           </div>
-          <span className="alert-action-link">स्टक हेर्नुहोस् →</span>
+          <span className="alert-action-link">{pick(language, { ne: 'स्टक हेर्नुहोस्', hi: 'स्टॉक देखें', en: 'View stock', mai: 'स्टक देखू', bho: 'स्टॉक देखीं' })} →</span>
         </div>
       )}
 
       {/* Quick Action Buttons */}
       <div className="dashboard-quick-actions">
-        <h3 className="section-title">छिटो कार्यहरू (Quick Actions)</h3>
+        <h3 className="section-title">{pick(language, { ne: 'छिटो कार्यहरू', hi: 'त्वरित कार्य', en: 'Quick Actions', mai: 'छिट कार्य', bho: 'जल्दी काम' })}</h3>
         <div className="quick-actions-row">
           <button
             type="button"
@@ -130,7 +131,7 @@ export default function ShopDashboard({ onNavigateTab }) {
             onClick={() => onNavigateTab('orders')}
           >
             <ShoppingBag size={20} />
-            <span>अर्डरहरू हेर्नुहोस् ({pendingOrders.length})</span>
+            <span>{pick(language, { ne: 'अर्डरहरू हेर्नुहोस्', hi: 'ऑर्डर देखें', en: 'View orders', mai: 'अर्डर देखू', bho: 'आर्डर देखीं' })} ({pendingOrders.length})</span>
           </button>
           <button
             type="button"

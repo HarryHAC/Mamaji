@@ -106,10 +106,16 @@ export default function ProductCatalog() {
             <strong>{t.micPrompt}</strong>
           </p>
           <p className="banner-examples">
-            "मलाई १ किलो आलु र २ किलो चिनी चाहियो"
+            {pick(language, {
+              ne: '"मलाई १ किलो आलु र २ किलो चिनी चाहियो"',
+              hi: '"मुझे 1 किलो आलू और 2 किलो चीनी चाहिए"',
+              en: '"I need 1 kg potato and 2 kg sugar"',
+              mai: '"हमरा १ किलो आलू आ २ किलो चीनी चाही"',
+              bho: '"हमरा १ किलो आलू आ २ किलो चीनी चाहीं"'
+            })}
           </p>
         </div>
-        <span className="banner-tap-cue">थिच्नुहोस् →</span>
+        <span className="banner-tap-cue">{pick(language, { ne: 'थिच्नुहोस्', hi: 'दबाएँ', en: 'Tap', mai: 'थिचू', bho: 'दबाईं' })} →</span>
       </div>
 
       {/* Category Pills */}
@@ -165,7 +171,7 @@ export default function ProductCatalog() {
               setSelectedCategory('all');
             }}
           >
-            सबै सामान हेर्नुहोस्
+            {pick(language, { ne: 'सबै सामान हेर्नुहोस्', hi: 'सभी सामान देखें', en: 'View all items', mai: 'सब सामान देखू', bho: 'सब सामान देखीं' })}
           </button>
         </div>
       )}

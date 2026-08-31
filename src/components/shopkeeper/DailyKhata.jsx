@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShopkeeper } from '../../context/ShopkeeperContext';
 import { useApp } from '../../context/AppContext';
+import { pick } from '../../utils/i18n';
 import { toDevanagariNumerals } from '../../utils/deliveryCalculator';
 import {
   DollarSign,
@@ -27,7 +28,7 @@ export default function DailyKhata() {
     totalExpenses,
     netProfit
   } = useShopkeeper();
-  const { t } = useApp();
+  const { t, language } = useApp();
 
   const [expenseTitle, setExpenseTitle] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
@@ -52,7 +53,7 @@ export default function DailyKhata() {
             <DollarSign size={20} className="section-icon" /> {t.khataTitle}
           </h2>
           <p className="section-subtitle">
-            <Calendar size={14} /> आजको मिति: {new Date().toLocaleDateString('ne-NP', {
+            <Calendar size={14} /> {pick(language, { ne: 'आजको मिति', hi: 'आज की तारीख', en: "Today's date", mai: 'आजुक मिति', bho: 'आज के तारीख' })}: {new Date().toLocaleDateString(language === 'en' ? 'en-US' : language === 'hi' ? 'hi-IN' : 'ne-NP', {
               year: 'numeric',
               month: 'long',
               day: 'numeric'
@@ -63,12 +64,12 @@ export default function DailyKhata() {
 
       {/* Net Today Summary Big Card */}
       <div className="khata-grand-card">
-        <span className="grand-badge">आजको खुद हिसाब (Net Savings)</span>
+        <span className="grand-badge">{pick(language, { ne: 'आजको खुद हिसाब', hi: 'आज का शुद्ध लाभ', en: 'Net Savings Today', mai: 'आजुक शुद्ध बचत', bho: 'आज के शुद्ध बचत' })}</span>
         <h1 className="grand-amount-display">
           रु {toDevanagariNumerals(netProfit)}
         </h1>
         <p className="grand-formula-text">
-          कुल आम्दानी (रु {toDevanagariNumerals(totalSales)}) - कुल खर्च (रु {toDevanagariNumerals(totalExpenses)})
+          {pick(language, { ne: 'कुल आम्दानी', hi: 'कुल आय', en: 'Total income', mai: 'कुल आमदनी', bho: 'कुल आमदनी' })} (रु {toDevanagariNumerals(totalSales)}) - {pick(language, { ne: 'कुल खर्च', hi: 'कुल खर्च', en: 'total expenses', mai: 'कुल खर्च', bho: 'कुल खरचा' })} (रु {toDevanagariNumerals(totalExpenses)})
         </p>
       </div>
 
@@ -142,7 +143,7 @@ export default function DailyKhata() {
                 required
                 min="1"
                 className="form-input"
-                placeholder="रकम (रु)"
+                placeholder={pick(language, { ne: 'रकम (रु)', hi: 'राशि (रु)', en: 'Amount (Rs)', mai: 'रकम (रु)', bho: 'रकम (रु)' })}
                 value={expenseAmount}
                 onChange={(e) => setExpenseAmount(e.target.value)}
               />
@@ -153,14 +154,14 @@ export default function DailyKhata() {
                 value={expenseCategory}
                 onChange={(e) => setExpenseCategory(e.target.value)}
               >
-                <option value="Delivery">डेलिभरी पेट्रोल</option>
-                <option value="Utilities">बिजुली / पानी</option>
-                <option value="Supplies">पसलको प्याकिङ</option>
-                <option value="Other">अन्य खर्च</option>
+                <option value="Delivery">{pick(language, { ne: 'डेलिभरी पेट्रोल', hi: 'डिलीवरी पेट्रोल', en: 'Delivery / Fuel', mai: 'डेलिभरी पेट्रोल', bho: 'डेलिभरी पेट्रोल' })}</option>
+                <option value="Utilities">{pick(language, { ne: 'बिजुली / पानी', hi: 'बिजली / पानी', en: 'Electricity / Water', mai: 'बिजली / पानी', bho: 'बिजली / पानी' })}</option>
+                <option value="Supplies">{pick(language, { ne: 'पसलको प्याकिङ', hi: 'दुकान की पैकिंग', en: 'Shop supplies', mai: 'दोकानक पैकिंग', bho: 'दोकान के पैकिंग' })}</option>
+                <option value="Other">{pick(language, { ne: 'अन्य खर्च', hi: 'अन्य खर्च', en: 'Other expense', mai: 'अन्य खर्च', bho: 'अन्य खरचा' })}</option>
               </select>
             </div>
             <button type="submit" className="btn-add-expense">
-              <Plus size={18} /> <span>थप्नुहोस्</span>
+              <Plus size={18} /> <span>{pick(language, { ne: 'थप्नुहोस्', hi: 'जोड़ें', en: 'Add', mai: 'जोड़ू', bho: 'जोड़ीं' })}</span>
             </button>
           </div>
         </form>
@@ -170,15 +171,15 @@ export default function DailyKhata() {
       <div className="expenses-history-card">
         <div className="card-header-row">
           <h3 className="card-heading">
-            <Receipt size={18} /> आज भएका खर्चहरू ({shopExpenses.length})
+            <Receipt size={18} /> {pick(language, { ne: 'आज भएका खर्चहरू', hi: 'आज के खर्च', en: "Today's expenses", mai: 'आजुक खर्च', bho: 'आज के खरचा' })} ({shopExpenses.length})
           </h3>
           <span className="total-exp-tag">
-            जम्मा खर्च: रु {toDevanagariNumerals(totalExpenses)}
+            {pick(language, { ne: 'जम्मा खर्च', hi: 'कुल खर्च', en: 'Total expense', mai: 'जम्मा खर्च', bho: 'कुल खरचा' })}: रु {toDevanagariNumerals(totalExpenses)}
           </span>
         </div>
 
         {shopExpenses.length === 0 ? (
-          <p className="no-expenses-text">आज कुनै खर्च रेकर्ड गरिएको छैन।</p>
+          <p className="no-expenses-text">{pick(language, { ne: 'आज कुनै खर्च रेकर्ड गरिएको छैन।', hi: 'आज कोई खर्च दर्ज नहीं किया गया।', en: 'No expenses recorded today.', mai: 'आजु कोनो खर्च दर्ज नै भेल।', bho: 'आज कवनो खरचा दर्ज नइखे भइल।' })}</p>
         ) : (
           <div className="expenses-table">
             {shopExpenses.map((exp) => (

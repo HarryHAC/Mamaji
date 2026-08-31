@@ -1,10 +1,11 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { toDevanagariNumerals } from '../../utils/deliveryCalculator';
+import { pick } from '../../utils/i18n';
 import { Clock, RotateCcw, ChevronRight, ShoppingBag, Truck, Store } from 'lucide-react';
 
 export default function CustomerOrders() {
-  const { myOrders: orders, shops, setActiveTrackingOrderId, reorderPreviousOrder, t } = useApp();
+  const { myOrders: orders, shops, setActiveTrackingOrderId, reorderPreviousOrder, t, language } = useApp();
 
   return (
     <div className="customer-orders-section">
@@ -12,14 +13,14 @@ export default function CustomerOrders() {
         <h2 className="section-title">
           <Clock size={20} className="section-icon" /> {t.myOrders}
         </h2>
-        <span className="section-badge">{orders.length} अर्डरहरू</span>
+        <span className="section-badge">{orders.length} {pick(language, { ne: 'अर्डरहरू', hi: 'ऑर्डर', en: 'orders', mai: 'अर्डर', bho: 'आर्डर' })}</span>
       </div>
 
       {orders.length === 0 ? (
         <div className="no-orders-box">
           <div className="empty-icon">📦</div>
-          <h3>कुनै अर्डर भेटिएन</h3>
-          <p>तपाईंले अहिलेसम्म कुनै अर्डर गर्नुभएको छैन।</p>
+          <h3>{pick(language, { ne: 'कुनै अर्डर भेटिएन', hi: 'कोई ऑर्डर नहीं मिला', en: 'No orders found', mai: 'कोनो अर्डर नै भेटल', bho: 'कवनो आर्डर ना मिलल' })}</h3>
+          <p>{pick(language, { ne: 'तपाईंले अहिलेसम्म कुनै अर्डर गर्नुभएको छैन।', hi: 'आपने अभी तक कोई ऑर्डर नहीं किया है।', en: "You haven't placed any orders yet.", mai: 'अहाँ एखन धरि कोनो अर्डर नै केने छी।', bho: 'रउरा अबले कवनो आर्डर नइखीं कइले।' })}</p>
         </div>
       ) : (
         <div className="orders-history-list">
@@ -66,7 +67,7 @@ export default function CustomerOrders() {
 
                 <div className="order-card-footer">
                   <div className="order-total-price">
-                    <span className="total-label">जम्मा:</span>
+                    <span className="total-label">{pick(language, { ne: 'जम्मा:', hi: 'कुल:', en: 'Total:', mai: 'जम्मा:', bho: 'कुल:' })}</span>
                     <span className="total-val">
                       रु {toDevanagariNumerals(order.grandTotal)}
                     </span>

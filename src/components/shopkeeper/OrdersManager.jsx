@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShopkeeper } from '../../context/ShopkeeperContext';
 import { useApp } from '../../context/AppContext';
+import { pick } from '../../utils/i18n';
 import { toDevanagariNumerals } from '../../utils/deliveryCalculator';
 import {
   Check,
@@ -24,7 +25,7 @@ export default function OrdersManager() {
     assignRiderToOrder,
     rejectOrder
   } = useShopkeeper();
-  const { t } = useApp();
+  const { t, language } = useApp();
 
   const [selectedLocationOrder, setSelectedLocationOrder] = useState(null);
   const [filterTab, setFilterTab] = useState('all'); // 'all' | 'pending' | 'completed'
@@ -65,21 +66,21 @@ export default function OrdersManager() {
             className={`filter-pill ${filterTab === 'all' ? 'active' : ''}`}
             onClick={() => setFilterTab('all')}
           >
-            सबै ({shopOrders.length})
+            {pick(language, { ne: 'सबै', hi: 'सभी', en: 'All', mai: 'सब', bho: 'सब' })} ({shopOrders.length})
           </button>
           <button
             type="button"
             className={`filter-pill ${filterTab === 'pending' ? 'active' : ''}`}
             onClick={() => setFilterTab('pending')}
           >
-            बाँकी ({shopOrders.filter(o => o.orderStatus !== 'delivered' && o.orderStatus !== 'rejected').length})
+            {pick(language, { ne: 'बाँकी', hi: 'बाकी', en: 'Pending', mai: 'बाँकी', bho: 'बाकी' })} ({shopOrders.filter(o => o.orderStatus !== 'delivered' && o.orderStatus !== 'rejected').length})
           </button>
           <button
             type="button"
             className={`filter-pill ${filterTab === 'completed' ? 'active' : ''}`}
             onClick={() => setFilterTab('completed')}
           >
-            सकिएका
+            {pick(language, { ne: 'सकिएका', hi: 'पूर्ण', en: 'Completed', mai: 'भेल', bho: 'पूरा' })}
           </button>
         </div>
       </div>
@@ -87,8 +88,8 @@ export default function OrdersManager() {
       {filteredOrders.length === 0 ? (
         <div className="no-orders-box">
           <div className="empty-icon">📦</div>
-          <h3>कुनै अर्डर छैन</h3>
-          <p>यस सूचीमा हाल कुनै अर्डर फेला परेन।</p>
+          <h3>{pick(language, { ne: 'कुनै अर्डर छैन', hi: 'कोई ऑर्डर नहीं', en: 'No orders', mai: 'कोनो अर्डर नै', bho: 'कवनो आर्डर नइखे' })}</h3>
+          <p>{pick(language, { ne: 'यस सूचीमा हाल कुनै अर्डर फेला परेन।', hi: 'इस सूची में अभी कोई ऑर्डर नहीं है।', en: 'No orders in this list right now.', mai: 'एहि सूचीमे एखन कोनो अर्डर नै।', bho: 'ए लिस्ट में अभी कवनो आर्डर नइखे।' })}</p>
         </div>
       ) : (
         <div className="shop-orders-list">
@@ -147,12 +148,12 @@ export default function OrdersManager() {
                       {order.locationPermissionGranted ? (
                         <>
                           <ShieldCheck size={16} className="icon-green" />
-                          <span>ग्राहकको स्थान हेर्नुहोस्</span>
+                          <span>{pick(language, { ne: 'ग्राहकको स्थान हेर्नुहोस्', hi: 'ग्राहक का स्थान देखें', en: "View customer's location", mai: 'ग्राहकक स्थान देखू', bho: 'ग्राहक के जगह देखीं' })}</span>
                         </>
                       ) : (
                         <>
                           <ShieldAlert size={16} className="icon-amber" />
-                          <span>स्थान अनुमति दिइएको छैन</span>
+                          <span>{pick(language, { ne: 'स्थान अनुमति दिइएको छैन', hi: 'स्थान की अनुमति नहीं दी गई', en: 'Location not shared', mai: 'स्थान अनुमति नै देल', bho: 'जगह के अनुमति नइखे' })}</span>
                         </>
                       )}
                     </button>
@@ -162,13 +163,13 @@ export default function OrdersManager() {
                 {/* Customer Special Note if any */}
                 {order.customerNote && (
                   <div className="customer-note-banner">
-                    <strong>ग्राहकको टिप्पणी:</strong> "{order.customerNote}"
+                    <strong>{pick(language, { ne: 'ग्राहकको टिप्पणी:', hi: 'ग्राहक की टिप्पणी:', en: "Customer's note:", mai: 'ग्राहकक टिप्पणी:', bho: 'ग्राहक के नोट:' })}</strong> "{order.customerNote}"
                   </div>
                 )}
 
                 {/* Ordered Items List */}
                 <div className="ordered-items-table">
-                  <h4>सामानको सूची:</h4>
+                  <h4>{pick(language, { ne: 'सामानको सूची:', hi: 'सामान की सूची:', en: 'Item list:', mai: 'सामानक सूची:', bho: 'सामान के सूची:' })}</h4>
                   {order.items.map((item, idx) => (
                     <div key={idx} className="ordered-item-row">
                       <span className="item-name">
@@ -265,7 +266,7 @@ export default function OrdersManager() {
           <div className="location-map-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>
-                <MapPin size={20} /> ग्राहकको डेलिभरी ठेगाना
+                <MapPin size={20} /> {pick(language, { ne: 'ग्राहकको डेलिभरी ठेगाना', hi: 'ग्राहक का डिलीवरी पता', en: 'Customer delivery address', mai: 'ग्राहकक डेलिभरी पता', bho: 'ग्राहक के डेलिभरी पता' })}
               </h3>
               <button
                 type="button"
@@ -289,11 +290,11 @@ export default function OrdersManager() {
                 <div className="map-view-placeholder">
                   <div className="map-pin-pulse">
                     <MapPin size={32} className="pin-icon" />
-                    <span className="pin-label">ग्राहकको घर</span>
+                    <span className="pin-label">{pick(language, { ne: 'ग्राहकको घर', hi: 'ग्राहक का घर', en: "Customer's home", mai: 'ग्राहकक घर', bho: 'ग्राहक के घर' })}</span>
                   </div>
                   <div className="map-info-overlay">
                     <span>GPS: 27.693° N, 85.338° E</span>
-                    <span>दूरी: {selectedLocationOrder.distanceKm} कि.मि.</span>
+                    <span>{pick(language, { ne: 'दूरी', hi: 'दूरी', en: 'Distance', mai: 'दूरी', bho: 'दूरी' })}: {selectedLocationOrder.distanceKm} {pick(language, { ne: 'कि.मि.', hi: 'कि.मी.', en: 'km', mai: 'कि.मी.', bho: 'कि.मी.' })}</span>
                   </div>
                 </div>
 
@@ -304,13 +305,13 @@ export default function OrdersManager() {
                     rel="noreferrer"
                     className="btn-open-google-maps"
                   >
-                    Google Maps मा हेर्नुहोस् ↗
+                    {pick(language, { ne: 'Google Maps मा हेर्नुहोस्', hi: 'Google Maps में देखें', en: 'View on Google Maps', mai: 'Google Maps मे देखू', bho: 'Google Maps में देखीं' })} ↗
                   </a>
                   <a
                     href={`tel:${selectedLocationOrder.customerPhone}`}
                     className="btn-call-customer"
                   >
-                    <Phone size={16} /> ग्राहकलाई कल गर्नुहोस्
+                    <Phone size={16} /> {pick(language, { ne: 'ग्राहकलाई कल गर्नुहोस्', hi: 'ग्राहक को कॉल करें', en: 'Call customer', mai: 'ग्राहकके कॉल करू', bho: 'ग्राहक के कॉल करीं' })}
                   </a>
                 </div>
               </div>

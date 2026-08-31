@@ -170,7 +170,7 @@ export default function InventoryManager() {
             <Package size={20} className="section-icon" /> {t.inventory}
           </h2>
           <p className="section-subtitle">
-            कुल {shopProducts.length} सामानहरू दर्ता छन्
+            {pick(language, { ne: 'कुल', hi: 'कुल', en: 'Total', mai: 'कुल', bho: 'कुल' })} {shopProducts.length} {pick(language, { ne: 'सामानहरू दर्ता छन्', hi: 'सामान दर्ज हैं', en: 'items registered', mai: 'सामान दर्ज अछि', bho: 'सामान दर्ज बा' })}
           </p>
         </div>
         <button
@@ -190,7 +190,7 @@ export default function InventoryManager() {
           <input
             type="text"
             className="inv-search-input"
-            placeholder="सामान खोज्नुहोस्..."
+            placeholder={pick(language, { ne: 'सामान खोज्नुहोस्...', hi: 'सामान खोजें...', en: 'Search items...', mai: 'सामान ताकू...', bho: 'सामान खोजीं...' })}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -241,7 +241,7 @@ export default function InventoryManager() {
 
                 {/* Stock Controls */}
                 <div className="inv-stock-stepper-row">
-                  <span className="stock-label">स्टक (Stock):</span>
+                  <span className="stock-label">{pick(language, { ne: 'स्टक', hi: 'स्टॉक', en: 'Stock', mai: 'स्टक', bho: 'स्टॉक' })}:</span>
                   <div className="stock-buttons">
                     <button
                       type="button"
@@ -264,20 +264,24 @@ export default function InventoryManager() {
                 </div>
 
                 <div className="inv-min-alert-text">
-                  न्यूनतम अलर्ट: {product.minStock || 5} {product.unit}
+                  {pick(language, { ne: 'न्यूनतम अलर्ट', hi: 'न्यूनतम अलर्ट', en: 'Min. alert', mai: 'न्यूनतम अलर्ट', bho: 'न्यूनतम अलर्ट' })}: {product.minStock || 5} {product.unit}
                 </div>
 
                 {/* Availability toggle — customers & the AI assistant respect this */}
                 <div className="inv-availability-row">
                   <span className="avail-label">
-                    {product.isAvailable ? '✅ उपलब्ध (Available)' : '⛔ अनुपलब्ध (Unavailable)'}
+                    {product.isAvailable
+                      ? '✅ ' + pick(language, { ne: 'उपलब्ध', hi: 'उपलब्ध', en: 'Available', mai: 'उपलब्ध', bho: 'उपलब्ध' })
+                      : '⛔ ' + pick(language, { ne: 'अनुपलब्ध', hi: 'अनुपलब्ध', en: 'Unavailable', mai: 'अनुपलब्ध', bho: 'अनुपलब्ध' })}
                   </span>
                   <button
                     type="button"
                     className={`avail-toggle ${product.isAvailable ? 'on' : 'off'}`}
                     onClick={() => toggleProductAvailability(product.id)}
                     aria-label="Toggle availability"
-                    title={product.isAvailable ? 'अनुपलब्ध बनाउनुहोस्' : 'उपलब्ध बनाउनुहोस्'}
+                    title={product.isAvailable
+                      ? pick(language, { ne: 'अनुपलब्ध बनाउनुहोस्', hi: 'अनुपलब्ध करें', en: 'Mark unavailable', mai: 'अनुपलब्ध बनाबू', bho: 'अनुपलब्ध बनाईं' })
+                      : pick(language, { ne: 'उपलब्ध बनाउनुहोस्', hi: 'उपलब्ध करें', en: 'Mark available', mai: 'उपलब्ध बनाबू', bho: 'उपलब्ध बनाईं' })}
                   >
                     <span className="avail-knob" />
                   </button>
@@ -291,7 +295,7 @@ export default function InventoryManager() {
                     onClick={() => handleOpenEditModal(product)}
                   >
                     <Edit2 size={16} />
-                    <span>सम्पादन</span>
+                    <span>{pick(language, { ne: 'सम्पादन', hi: 'संपादन', en: 'Edit', mai: 'संपादन', bho: 'एडिट' })}</span>
                   </button>
                   <button
                     type="button"

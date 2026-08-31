@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShopkeeper } from '../../context/ShopkeeperContext';
 import { useApp } from '../../context/AppContext';
+import { pick } from '../../utils/i18n';
 import {
   Settings,
   Clock,
@@ -19,7 +20,7 @@ import {
 
 export default function ShopSettings() {
   const { shopData, updateShopSettings } = useShopkeeper();
-  const { t } = useApp();
+  const { t, language } = useApp();
 
   // Shop basic info
   const [name, setName] = useState(shopData.name);
@@ -103,7 +104,7 @@ export default function ShopSettings() {
             <Settings size={20} className="section-icon" /> {t.shopSettingsTitle}
           </h2>
           <p className="section-subtitle">
-            पसल, डेलिभरी र भुक्तानी प्राप्त गर्ने खाताहरूको व्यवस्थापन
+            {pick(language, { ne: 'पसल, डेलिभरी र भुक्तानी प्राप्त गर्ने खाताहरूको व्यवस्थापन', hi: 'दुकान, डिलीवरी और भुगतान प्राप्त करने वाले खातों का प्रबंधन', en: 'Manage your shop, delivery and payment-receiving accounts', mai: 'दोकान, डेलिभरी आ भुगतान प्राप्तिक खाताक प्रबंधन', bho: 'दोकान, डेलिभरी आ भुगतान पावे वाला खाता के प्रबंधन' })}
           </p>
         </div>
       </div>
@@ -112,7 +113,7 @@ export default function ShopSettings() {
         {/* 1. Basic Info */}
         <div className="settings-card">
           <h3 className="card-heading">
-            <Building size={18} /> पसलको सामान्य विवरण
+            <Building size={18} /> {pick(language, { ne: 'पसलको सामान्य विवरण', hi: 'दुकान की सामान्य जानकारी', en: 'Shop basic details', mai: 'दोकानक सामान्य विवरण', bho: 'दोकान के सामान्य जानकारी' })}
           </h3>
           <div className="form-grid-2">
             <div className="form-group">
@@ -161,7 +162,7 @@ export default function ShopSettings() {
         {/* 2. Opening Hours & Delivery Availability */}
         <div className="settings-card">
           <h3 className="card-heading">
-            <Clock size={18} /> पसलको समय र डेलिभरी सेवा
+            <Clock size={18} /> {pick(language, { ne: 'पसलको समय र डेलिभरी सेवा', hi: 'दुकान का समय और डिलीवरी सेवा', en: 'Shop hours & delivery service', mai: 'दोकानक समय आ डेलिभरी सेवा', bho: 'दोकान के समय आ डेलिभरी सेवा' })}
           </h3>
           <div className="form-grid-2">
             <div className="form-group">
@@ -186,9 +187,9 @@ export default function ShopSettings() {
 
           <div className="toggle-setting-row">
             <div>
-              <h4 className="toggle-title">डेलिभरी सेवा खुल्ला राख्नुहोस्</h4>
+              <h4 className="toggle-title">{pick(language, { ne: 'डेलिभरी सेवा खुल्ला राख्नुहोस्', hi: 'डिलीवरी सेवा चालू रखें', en: 'Keep delivery service on', mai: 'डेलिभरी सेवा चालू राखू', bho: 'डेलिभरी सेवा चालू राखीं' })}</h4>
               <p className="toggle-sub">
-                यो बन्द गरेमा ग्राहकले केवल पसलबाट लिन (Pickup) मात्र पाउनेछन्।
+                {pick(language, { ne: 'यो बन्द गरेमा ग्राहकले केवल पसलबाट लिन (Pickup) मात्र पाउनेछन्।', hi: 'इसे बंद करने पर ग्राहक केवल दुकान से ले जा सकेंगे (Pickup)।', en: 'If turned off, customers can only pick up from the shop.', mai: 'ई बन्द केला पर ग्राहक खाली दोकानसँ लऽ सकताह (Pickup)।', bho: 'ई बंद कइला पर ग्राहक खाली दोकान से ले सकिहें (Pickup)।' })}
               </p>
             </div>
             <input
@@ -284,7 +285,7 @@ export default function ShopSettings() {
         {/* 4. Delivery Persons List (Section 18) */}
         <div className="settings-card">
           <h3 className="card-heading">
-            <User size={18} /> डेलिभरी गर्ने व्यक्तिहरू
+            <User size={18} /> {pick(language, { ne: 'डेलिभरी गर्ने व्यक्तिहरू', hi: 'डिलीवरी करने वाले लोग', en: 'Delivery people', mai: 'डेलिभरी करय बला लोक', bho: 'डेलिभरी करे वाला लोग' })}
           </h3>
           <div className="persons-list-tags">
             {deliveryPersons.map((person, idx) => (
@@ -306,7 +307,7 @@ export default function ShopSettings() {
             <input
               type="text"
               className="form-input"
-              placeholder="डेलिभरी व्यक्तिको नाम (जस्तै: सन्तोष - ९८xxxx)"
+              placeholder={pick(language, { ne: 'डेलिभरी व्यक्तिको नाम (जस्तै: सन्तोष - ९८xxxx)', hi: 'डिलीवरी व्यक्ति का नाम (जैसे: संतोष - 98xxxx)', en: 'Delivery person name (e.g. Santosh - 98xxxx)', mai: 'डेलिभरी व्यक्तिक नाम (जेना: संतोष - ९८xxxx)', bho: 'डेलिभरी वाला के नाम (जइसे: संतोष - ९८xxxx)' })}
               value={newPersonName}
               onChange={(e) => setNewPersonName(e.target.value)}
             />
@@ -315,7 +316,7 @@ export default function ShopSettings() {
               className="btn-add-person"
               onClick={handleAddDeliveryPerson}
             >
-              <Plus size={16} /> थप्नुहोस्
+              <Plus size={16} /> {pick(language, { ne: 'थप्नुहोस्', hi: 'जोड़ें', en: 'Add', mai: 'जोड़ू', bho: 'जोड़ीं' })}
             </button>
           </div>
         </div>
@@ -326,7 +327,7 @@ export default function ShopSettings() {
             <CreditCard size={18} /> {t.paymentSettings}
           </h3>
           <p className="hint-text">
-            प्रत्येक पसलेको आफ्नै छुट्टाछुट्टै भुक्तानी खाता हुनेछ। ग्राहकले यहाँ तोकिएका खातामा मात्र पैसा पठाउनेछन्।
+            {pick(language, { ne: 'प्रत्येक पसलेको आफ्नै छुट्टाछुट्टै भुक्तानी खाता हुनेछ। ग्राहकले यहाँ तोकिएका खातामा मात्र पैसा पठाउनेछन्।', hi: 'हर दुकानदार का अपना अलग भुगतान खाता होगा। ग्राहक यहाँ तय किए गए खाते में ही पैसे भेजेंगे।', en: 'Each shop owner has their own separate payment accounts. Customers send money only to the accounts set here.', mai: 'प्रत्येक दोकानदारक अपन अलग भुगतान खाता रहत। ग्राहक एतय तय कएल खातामे मात्र पैसा पठौताह।', bho: 'हर दोकानदार के आपन अलग भुगतान खाता रही। ग्राहक इहाँ तय कइल खाता में ही पैसा भेजिहें।' })}
           </p>
 
           <div className="payment-account-config-grid">
@@ -338,13 +339,13 @@ export default function ShopSettings() {
                   checked={esewaEnabled}
                   onChange={(e) => setEsewaEnabled(e.target.checked)}
                 />
-                <strong>ई-सेवा (eSewa ID)</strong>
+                <strong>{pick(language, { ne: 'ई-सेवा (eSewa ID)', hi: 'ई-सेवा (eSewa ID)', en: 'eSewa (eSewa ID)', mai: 'ई-सेवा (eSewa ID)', bho: 'ई-सेवा (eSewa ID)' })}</strong>
               </label>
               {esewaEnabled && (
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="ई-सेवा आइडी वा फोन"
+                  placeholder={pick(language, { ne: 'ई-सेवा आइडी वा फोन', hi: 'ई-सेवा आईडी या फोन', en: 'eSewa ID or phone', mai: 'ई-सेवा आईडी वा फोन', bho: 'ई-सेवा आईडी भा फोन' })}
                   value={esewaId}
                   onChange={(e) => setEsewaId(e.target.value)}
                 />
@@ -359,13 +360,13 @@ export default function ShopSettings() {
                   checked={khaltiEnabled}
                   onChange={(e) => setKhaltiEnabled(e.target.checked)}
                 />
-                <strong>खल्ती (Khalti ID)</strong>
+                <strong>{pick(language, { ne: 'खल्ती (Khalti ID)', hi: 'खल्ती (Khalti ID)', en: 'Khalti (Khalti ID)', mai: 'खल्ती (Khalti ID)', bho: 'खल्ती (Khalti ID)' })}</strong>
               </label>
               {khaltiEnabled && (
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="खल्ती आइडी वा फोन"
+                  placeholder={pick(language, { ne: 'खल्ती आइडी वा फोन', hi: 'खल्ती आईडी या फोन', en: 'Khalti ID or phone', mai: 'खल्ती आईडी वा फोन', bho: 'खल्ती आईडी भा फोन' })}
                   value={khaltiId}
                   onChange={(e) => setKhaltiId(e.target.value)}
                 />
@@ -380,7 +381,7 @@ export default function ShopSettings() {
                   checked={bankTransferEnabled}
                   onChange={(e) => setBankTransferEnabled(e.target.checked)}
                 />
-                <strong>बैंक खाता तथा क्युआर (Bank Transfer)</strong>
+                <strong>{pick(language, { ne: 'बैंक खाता तथा क्युआर (Bank Transfer)', hi: 'बैंक खाता व QR (Bank Transfer)', en: 'Bank account & QR (Bank Transfer)', mai: 'बैंक खाता आ QR (Bank Transfer)', bho: 'बैंक खाता आ QR (Bank Transfer)' })}</strong>
               </label>
 
               {bankTransferEnabled && (
@@ -388,21 +389,21 @@ export default function ShopSettings() {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="बैंकको नाम (जस्तै: Nabil Bank)"
+                    placeholder={pick(language, { ne: 'बैंकको नाम (जस्तै: Nabil Bank)', hi: 'बैंक का नाम (जैसे: Nabil Bank)', en: 'Bank name (e.g. Nabil Bank)', mai: 'बैंकक नाम (जेना: Nabil Bank)', bho: 'बैंक के नाम (जइसे: Nabil Bank)' })}
                     value={bankName}
                     onChange={(e) => setBankName(e.target.value)}
                   />
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="खातावालाको नाम"
+                    placeholder={pick(language, { ne: 'खातावालाको नाम', hi: 'खाताधारक का नाम', en: 'Account holder name', mai: 'खाताधारकक नाम', bho: 'खाताधारक के नाम' })}
                     value={bankAccountHolder}
                     onChange={(e) => setBankAccountHolder(e.target.value)}
                   />
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="खाता नम्बर"
+                    placeholder={pick(language, { ne: 'खाता नम्बर', hi: 'खाता नंबर', en: 'Account number', mai: 'खाता नंबर', bho: 'खाता नंबर' })}
                     value={bankAccountNumber}
                     onChange={(e) => setBankAccountNumber(e.target.value)}
                   />
@@ -416,7 +417,7 @@ export default function ShopSettings() {
         <div className="settings-submit-footer">
           <button type="submit" className="btn-save-all-settings">
             <Save size={18} />
-            <span>सबै सेटिङ सुरक्षित गर्नुहोस्</span>
+            <span>{pick(language, { ne: 'सबै सेटिङ सुरक्षित गर्नुहोस्', hi: 'सभी सेटिंग सहेजें', en: 'Save all settings', mai: 'सब सेटिंग सुरक्षित करू', bho: 'सब सेटिंग सेव करीं' })}</span>
           </button>
         </div>
       </form>
