@@ -4,6 +4,7 @@ import { useShopkeeper } from './ShopkeeperContext';
 import { soundEffects } from '../utils/audioAlerts';
 import { SHOP_AGENT } from '../constants/shopAgentPhrases';
 import { getShopCategories } from '../constants/shopTypes';
+import { cleanTranscript } from '../utils/transcript';
 import { parseSpokenNumber, parseUnit } from '../utils/voiceParse';
 import { speechLocale } from '../utils/i18n';
 
@@ -42,11 +43,11 @@ function findProduct(text, products) {
 
 function detectShopIntent(text) {
   const t = (text || '').toLowerCase();
-  if (/नयाँ सामान|सामान थप|नयाँ आइटम|नव सामान|सामान जोड|add item|add product|add.*new|new item|naya saman|item add/.test(t)) return 'add';
-  if (/सहायता|मद्दत|help|के गर्न|कसरी/.test(t)) return 'help';
-  if (/अनुपलब्ध|उपलब्ध|unavailable|available|out of stock|बन्द गर|लुकाउ|हटाउ|देखाउ/.test(t)) return 'toggle_avail';
-  if (/मूल्य|दाम|price|rate|रेट/.test(t)) return 'set_price';
-  if (/स्टक|stock|मात्रा|quantity|मौज्दात/.test(t)) return 'set_stock';
+  if (/नयाँ सामान|नया सामान|सामान थप|सामान जोड|सामान डाल|जोड़ीं|जोड़ें|जोड़ो|जोड़|एड कर|नयाँ आइटम|नया आइटम|नव सामान|add item|add product|add.*new|new item|naya saman|saman jod|saman add|item add/.test(t)) return 'add';
+  if (/सहायता|मद्दत|मदद|help|के गर्न|क्या कर|कसरी|कैसे/.test(t)) return 'help';
+  if (/अनुपलब्ध|उपलब्ध|unavailable|available|out of stock|बन्द गर|बंद कर|लुकाउ|हटाउ|हटा|देखाउ|दिखा/.test(t)) return 'toggle_avail';
+  if (/मूल्य|दाम|price|rate|रेट|कीमत/.test(t)) return 'set_price';
+  if (/स्टक|स्टॉक|stock|मात्रा|quantity|मौज्दात/.test(t)) return 'set_stock';
   return 'unknown';
 }
 
@@ -152,7 +153,7 @@ export function ShopAgentProvider({ children }) {
         finalBufferRef.current = (finalBufferRef.current + ' ' + final).trim();
         clearTimeout(processTimerRef.current);
         processTimerRef.current = setTimeout(() => {
-          const text = finalBufferRef.current.trim();
+          const text = cleanTranscript(finalBufferRef.current.trim());
           finalBufferRef.current = '';
           setTranscript('');
           if (text && text.length >= 2) latestRef.current.process?.(text);

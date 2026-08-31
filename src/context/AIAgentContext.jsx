@@ -6,6 +6,7 @@ import { soundEffects } from '../utils/audioAlerts';
 import { INITIAL_PRODUCTS } from '../constants/sampleData';
 import { AGENT } from '../constants/agentPhrases';
 import { pick, speechLocale } from '../utils/i18n';
+import { cleanTranscript } from '../utils/transcript';
 
 // Pick the clearest available voice for a speech locale.
 function bestVoice(loc) {
@@ -267,7 +268,7 @@ export function AIAgentProvider({ children }) {
         // Debounce: wait briefly in case the sentence arrives in several pieces.
         clearTimeout(processTimerRef.current);
         processTimerRef.current = setTimeout(() => {
-          const text = finalBufferRef.current.trim();
+          const text = cleanTranscript(finalBufferRef.current.trim());
           finalBufferRef.current = '';
           setTranscript('');
           if (text && text.length >= 2) latestRef.current.processUserInput?.(text);
