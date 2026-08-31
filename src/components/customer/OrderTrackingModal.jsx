@@ -85,7 +85,7 @@ export default function OrderTrackingModal() {
               <span className="rejected-icon">❌</span>
               <h3>{t.statusRejected}</h3>
               <p>{pick(language, {
-                ne: 'पसलमा सामानको अभाव वा प्राविधिक कारणले अर्डर रद्द भएको छ।',
+                ne: 'पसलमा सामानको अभाव वा प्राविधिक कारणले अर्डर रद्द भएको छ।', hi: 'स्टॉक की कमी या तकनीकी कारण से ऑर्डर रद्द कर दिया गया।',
                 en: 'The order was cancelled due to stock shortage or a technical reason.',
                 mai: 'दोकानमे सामानक कमी वा प्राविधिक कारणसँ अर्डर रद्द भऽ गेल।',
                 bho: 'दोकान में सामान के कमी भा तकनीकी कारण से आर्डर रद्द हो गइल।'
@@ -111,7 +111,7 @@ export default function OrderTrackingModal() {
                       <h4 className="step-title">{stepItem.label}</h4>
                       {isCurrent && !isDelivered && (
                         <span className="step-live-pulse">{pick(language, {
-                          ne: 'अहिले यो चरणमा छ...',
+                          ne: 'अहिले यो चरणमा छ...', hi: 'अभी इस चरण में है...',
                           en: 'Currently at this step...',
                           mai: 'एखन एहि चरणमे अछि...',
                           bho: 'अभी एह चरण में बा...'
@@ -139,7 +139,7 @@ export default function OrderTrackingModal() {
                 <span className="rider-label">{t.deliveredBy}</span>
                 <h4 className="rider-name">
                   {pick(language, {
-                    ne: `तपाईंको अर्डर ${order.assignedRider} ले डेलिभर गर्दै हुनुहुन्छ।`,
+                    ne: `तपाईंको अर्डर ${order.assignedRider} ले डेलिभर गर्दै हुनुहुन्छ।`, hi: `${order.assignedRider} आपका ऑर्डर डिलीवर कर रहे हैं।`,
                     en: `${order.assignedRider} is delivering your order.`,
                     mai: `अहाँक अर्डर ${order.assignedRider} डेलिभर कऽ रहल छथि।`,
                     bho: `रउरा आर्डर ${order.assignedRider} डेलिभर करत बाड़न।`
@@ -152,7 +152,7 @@ export default function OrderTrackingModal() {
           {/* Order Details Accordion */}
           <div className="order-items-summary-card">
             <h4 className="card-section-title">{pick(language, {
-              ne: 'अर्डर गरिएका सामानहरू:',
+              ne: 'अर्डर गरिएका सामानहरू:', hi: 'ऑर्डर किए गए सामान:',
               en: 'Ordered items:',
               mai: 'अर्डर कएल सामान:',
               bho: 'आर्डर कइल सामान:'
@@ -210,7 +210,7 @@ export default function OrderTrackingModal() {
                     type="text"
                     className="review-input"
                     placeholder={pick(language, {
-                      ne: 'छोटो प्रतिक्रिया लेख्नुहोस् (ऐच्छिक)...',
+                      ne: 'छोटो प्रतिक्रिया लेख्नुहोस् (ऐच्छिक)...', hi: 'छोटी समीक्षा लिखें (वैकल्पिक)...',
                       en: 'Write a short review (optional)...',
                       mai: 'छोट प्रतिक्रिया लिखू (ऐच्छिक)...',
                       bho: 'छोट राय लिखीं (ऐच्छिक)...'

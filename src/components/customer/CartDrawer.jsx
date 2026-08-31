@@ -65,7 +65,7 @@ export default function CartDrawer() {
                 className="btn-start-shopping"
                 onClick={() => setIsCartOpen(false)}
               >
-                {pick(language, { ne: 'सामान छान्नुहोस्', en: 'Start Shopping', mai: 'सामान चुनू', bho: 'सामान चुनीं' })}
+                {pick(language, { ne: 'सामान छान्नुहोस्', hi: 'खरीदारी शुरू करें', en: 'Start Shopping', mai: 'सामान चुनू', bho: 'सामान चुनीं' })}
               </button>
             </div>
           ) : (
@@ -182,7 +182,7 @@ export default function CartDrawer() {
                 className="btn-clear-cart"
                 onClick={clearCart}
               >
-                {pick(language, { ne: 'खाली गर्नुहोस्', en: 'Clear', mai: 'खाली करू', bho: 'खाली करीं' })}
+                {pick(language, { ne: 'खाली गर्नुहोस्', hi: 'खाली करें', en: 'Clear', mai: 'खाली करू', bho: 'खाली करीं' })}
               </button>
               <button
                 type="button"

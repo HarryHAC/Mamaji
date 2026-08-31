@@ -16,7 +16,7 @@ export default function LiveDeliveryTracker({ order, shop, language }) {
     return () => clearInterval(id);
   }, [order?.id]);
 
-  const rider = order?.assignedRider || pick(language, { ne: 'पसले आफैं', en: 'The shopkeeper', mai: 'दोकानदार', bho: 'दोकानदार' });
+  const rider = order?.assignedRider || pick(language, { ne: 'पसले आफैं', hi: 'दुकानदार', en: 'The shopkeeper', mai: 'दोकानदार', bho: 'दोकानदार' });
   // Try to pull a phone number out of the rider string, else use the shop phone.
   const phoneMatch = String(rider).match(/(\+?9\d[\d\s-]{7,})/);
   const riderPhone = (phoneMatch ? phoneMatch[1] : shop?.phone || '').replace(/\s/g, '');

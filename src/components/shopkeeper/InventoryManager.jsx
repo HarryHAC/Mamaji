@@ -119,7 +119,7 @@ export default function InventoryManager() {
       setImage(dataUrl);
     } catch (err) {
       setCameraError(pick(language, {
-        ne: 'फोटो पढ्न सकिएन।', en: 'Could not read that image.', mai: 'फोटो पढ़ि नै सकल।', bho: 'फोटो पढ़ल ना जा सकल।'
+        ne: 'फोटो पढ्न सकिएन।', hi: 'फोटो पढ़ा नहीं जा सका।', en: 'Could not read that image.', mai: 'फोटो पढ़ि नै सकल।', bho: 'फोटो पढ़ल ना जा सकल।'
       }));
     } finally {
       setImageBusy(false);
@@ -444,7 +444,7 @@ export default function InventoryManager() {
                 <div className="ai-image-header">
                   <label className="form-label">
                     <ImageIcon size={16} className="sparkle-gold" /> {pick(language, {
-                      ne: 'सामानको फोटो', en: 'Product Photo', mai: 'सामानक फोटो', bho: 'सामान के फोटो'
+                      ne: 'सामानको फोटो', hi: 'सामान की फोटो', en: 'Product Photo', mai: 'सामानक फोटो', bho: 'सामान के फोटो'
                     })}
                   </label>
                 </div>
@@ -486,7 +486,7 @@ export default function InventoryManager() {
                     {String(image).startsWith('data:') && !String(image).startsWith('data:image/svg') ? (
                       <div className="photo-attached-chip">
                         <Check size={14} />
-                        <span>{pick(language, { ne: 'फोटो संलग्न भयो', en: 'Photo attached', mai: 'फोटो संलग्न भेल', bho: 'फोटो लाग गइल' })}</span>
+                        <span>{pick(language, { ne: 'फोटो संलग्न भयो', hi: 'फोटो जोड़ी गई', en: 'Photo attached', mai: 'फोटो संलग्न भेल', bho: 'फोटो लाग गइल' })}</span>
                         <button type="button" onClick={() => setImage('')} aria-label="remove photo"><X size={13} /></button>
                       </div>
                     ) : (
@@ -494,7 +494,7 @@ export default function InventoryManager() {
                         type="text"
                         className="form-input text-xs"
                         placeholder={pick(language, {
-                          ne: 'वा फोटोको URL यहाँ हाल्नुहोस्...', en: 'Or paste a photo URL...',
+                          ne: 'वा फोटोको URL यहाँ हाल्नुहोस्...', hi: 'या फोटो का URL यहाँ डालें...', en: 'Or paste a photo URL...',
                           mai: 'वा फोटोक URL देब...', bho: 'भा फोटो के URL दीं...'
                         })}
                         value={image}
@@ -502,7 +502,7 @@ export default function InventoryManager() {
                       />
                     )}
 
-                    {imageBusy && <small className="hint-text">{pick(language, { ne: 'फोटो प्रशोधन हुँदैछ...', en: 'Processing photo...', mai: 'फोटो प्रोसेस...', bho: 'फोटो प्रोसेस...' })}</small>}
+                    {imageBusy && <small className="hint-text">{pick(language, { ne: 'फोटो प्रशोधन हुँदैछ...', hi: 'फोटो प्रोसेस हो रही है...', en: 'Processing photo...', mai: 'फोटो प्रोसेस...', bho: 'फोटो प्रोसेस...' })}</small>}
                     {cameraError && <small className="hint-text error">{cameraError}</small>}
                     {!cameraError && !imageBusy && (
                       <small className="hint-text">{pick(language, {

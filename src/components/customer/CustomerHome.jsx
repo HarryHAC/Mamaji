@@ -56,7 +56,7 @@ export default function CustomerHome() {
             className="btn-change-shop-pill"
             onClick={() => setShowShopPicker(!showShopPicker)}
           >
-            {showShopPicker ? (pick(language, { ne: 'बन्द गर्नुहोस्', en: 'Close', mai: 'बन्द करू', bho: 'बंद करीं' })) : t.changeShop}
+            {showShopPicker ? (pick(language, { ne: 'बन्द गर्नुहोस्', hi: 'बंद करें', en: 'Close', mai: 'बन्द करू', bho: 'बंद करीं' })) : t.changeShop}
           </button>
         </div>
       )}
@@ -76,15 +76,15 @@ export default function CustomerHome() {
           ) : (
             <div className="empty-state-box">
               <div className="empty-state-icon">🛍️</div>
-              <h3>{pick(language, { ne: 'पसल छान्नुहोस्', en: 'Choose a shop', mai: 'दोकान चुनू', bho: 'दोकान चुनीं' })}</h3>
+              <h3>{pick(language, { ne: 'पसल छान्नुहोस्', hi: 'दुकान चुनें', en: 'Choose a shop', mai: 'दोकान चुनू', bho: 'दोकान चुनीं' })}</h3>
               <p>{pick(language, {
-                ne: 'सामान हेर्न सुरु गर्न कुनै नजिकको पसल छान्नुहोस्।',
+                ne: 'सामान हेर्न सुरु गर्न कुनै नजिकको पसल छान्नुहोस्।', hi: 'उत्पाद देखने के लिए पास की कोई दुकान चुनें।',
                 en: 'Pick a nearby shop to start browsing products.',
                 mai: 'सामान देखय लेल कोनो नजदीकक दोकान चुनू।',
                 bho: 'सामान देखे खातिर कवनो नजदीक के दोकान चुनीं।'
               })}</p>
               <button type="button" className="btn-start-shopping" onClick={() => setActiveTab('shops')}>
-                {pick(language, { ne: 'पसलहरू हेर्नुहोस्', en: 'Browse shops', mai: 'दोकान देखू', bho: 'दोकान देखीं' })}
+                {pick(language, { ne: 'पसलहरू हेर्नुहोस्', hi: 'दुकानें देखें', en: 'Browse shops', mai: 'दोकान देखू', bho: 'दोकान देखीं' })}
               </button>
             </div>
           )

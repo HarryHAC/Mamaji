@@ -21,7 +21,7 @@ export default function ShopList() {
       setCustomerInfo(prev => ({ ...prev, lat: loc.lat, lng: loc.lng, hasLocationPermission: true }));
     } catch (e) {
       setLocError(pick(language, {
-        ne: 'लोकेशन पाउन सकिएन। अनुमति दिनुहोस्।', en: 'Could not get location. Please allow access.',
+        ne: 'लोकेशन पाउन सकिएन। अनुमति दिनुहोस्।', hi: 'लोकेशन नहीं मिल सका। अनुमति दें।', en: 'Could not get location. Please allow access.',
         mai: 'लोकेशन नै भेटल। अनुमति दिअ\'।', bho: 'लोकेशन ना मिलल। अनुमति दीं।'
       }));
     } finally {
@@ -49,7 +49,7 @@ export default function ShopList() {
         <h2 className="section-title">
           <MapPin size={20} className="section-icon" /> {t.shops}
         </h2>
-        <span className="section-badge">{visibleShops.length} {pick(language, { ne: 'पसलहरू', en: 'shops', mai: 'दोकान', bho: 'दोकान' })}</span>
+        <span className="section-badge">{visibleShops.length} {pick(language, { ne: 'पसलहरू', hi: 'दुकानें', en: 'shops', mai: 'दोकान', bho: 'दोकान' })}</span>
       </div>
 
       {/* Shop-type filter chips */}
@@ -60,7 +60,7 @@ export default function ShopList() {
           onClick={() => setTypeFilter('all')}
         >
           <span className="chip-icon">🏬</span>
-          <span>{pick(language, { ne: 'सबै', en: 'All', mai: 'सब', bho: 'सब' })}</span>
+          <span>{pick(language, { ne: 'सबै', hi: 'सभी', en: 'All', mai: 'सब', bho: 'सब' })}</span>
         </button>
         {availableTypes.map(tp => (
           <button
@@ -80,8 +80,8 @@ export default function ShopList() {
         <button type="button" className="use-location-btn" onClick={requestLocation} disabled={locating}>
           {locating ? <Loader2 size={15} className="spin" /> : <LocateFixed size={15} />}
           <span>{userLoc
-            ? pick(language, { ne: 'लोकेशन अनुसार क्रमबद्ध', en: 'Sorted by your location', mai: 'लोकेशन अनुसार', bho: 'लोकेशन अनुसार' })
-            : pick(language, { ne: 'मेरो लोकेशनबाट नजिकका पसल', en: 'Nearest shops to my location', mai: 'हमर लोकेशनसँ नजदीक', bho: 'हमार लोकेशन से नजदीक' })}</span>
+            ? pick(language, { ne: 'लोकेशन अनुसार क्रमबद्ध', hi: 'आपके लोकेशन के अनुसार', en: 'Sorted by your location', mai: 'लोकेशन अनुसार', bho: 'लोकेशन अनुसार' })
+            : pick(language, { ne: 'मेरो लोकेशनबाट नजिकका पसल', hi: 'मेरे लोकेशन के पास की दुकानें', en: 'Nearest shops to my location', mai: 'हमर लोकेशनसँ नजदीक', bho: 'हमार लोकेशन से नजदीक' })}</span>
         </button>
       )}
       {locError && <p className="loc-error-text">{locError}</p>}
@@ -89,9 +89,9 @@ export default function ShopList() {
       {shops.length === 0 && (
         <div className="empty-state-box">
           <div className="empty-state-icon">🏪</div>
-          <h3>{pick(language, { ne: 'अहिले कुनै पसल छैन', en: 'No shops yet', mai: 'एखन कोनो दोकान नै', bho: 'अभी कवनो दोकान नइखे' })}</h3>
+          <h3>{pick(language, { ne: 'अहिले कुनै पसल छैन', hi: 'अभी कोई दुकान नहीं', en: 'No shops yet', mai: 'एखन कोनो दोकान नै', bho: 'अभी कवनो दोकान नइखे' })}</h3>
           <p>{pick(language, {
-            ne: 'तपाईंको नजिकका पसलहरू दर्ता भएपछि यहाँ देखिनेछन्।',
+            ne: 'तपाईंको नजिकका पसलहरू दर्ता भएपछि यहाँ देखिनेछन्।', hi: 'आपके पास की दुकानें दर्ज होने पर यहाँ दिखेंगी।',
             en: 'Shops near you will appear here once they register.',
             mai: 'अहाँक नजदीकक दोकान दर्ता भेलाक बाद एतय देखाइत।',
             bho: 'रउरा नजदीक के दोकान दर्ता भइला के बाद इहाँ देखाई।'
@@ -166,7 +166,7 @@ export default function ShopList() {
                       </>
                     ) : (
                       <>
-                        <ShoppingBag size={16} /> {pick(language, { ne: 'यो पसल छान्नुहोस्', en: 'Choose this shop', mai: 'ई दोकान चुनू', bho: 'ई दोकान चुनीं' })}
+                        <ShoppingBag size={16} /> {pick(language, { ne: 'यो पसल छान्नुहोस्', hi: 'यह दुकान चुनें', en: 'Choose this shop', mai: 'ई दोकान चुनू', bho: 'ई दोकान चुनीं' })}
                       </>
                     )}
                   </button>

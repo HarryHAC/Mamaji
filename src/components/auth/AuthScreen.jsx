@@ -36,12 +36,54 @@ export default function AuthScreen() {
   const captureLocation = async () => {
     setLocBusy(true);
     try { setShopLoc(await getCurrentLocation()); }
-    catch (e) { setError(pick(language, { ne: 'लोकेशन अनुमति दिनुहोस्।', en: 'Please allow location access.', mai: 'लोकेशन अनुमति दिअ\'।', bho: 'लोकेशन अनुमति दीं।' })); }
+    catch (e) { setError(pick(language, { ne: 'लोकेशन अनुमति दिनुहोस्।', hi: 'लोकेशन अनुमति दें।', en: 'Please allow location access.', mai: 'लोकेशन अनुमति दिअ\'।', bho: 'लोकेशन अनुमति दीं।' })); }
     finally { setLocBusy(false); }
   };
 
   const ne = language !== 'en'; // Devanagari languages (ne/hi/mai/bho)
-  const L = (nep, eng) => (ne ? nep : eng);
+  // Hindi rendering for the auth screen, keyed by the Nepali string. This lets
+  // the existing L(nep, eng) call sites stay unchanged while Hindi still shows
+  // proper Hindi (mai/bho keep the Nepali Devanagari, as before).
+  const HI = {
+    'बोलेर सामान अर्डर गर्नुहोस् — टाइप गर्नु पर्दैन।': 'बोलकर सामान ऑर्डर करें — टाइप करने की ज़रूरत नहीं।',
+    'लगइन': 'लॉगिन',
+    'नयाँ खाता': 'नया खाता',
+    'पासवर्ड बिर्सनुभयो?': 'पासवर्ड भूल गए?',
+    'OTP पठाउन आफ्नो फोन नम्बर वा इमेल दिनुहोस्।': 'OTP पाने के लिए अपना फोन नंबर या ईमेल दें।',
+    'तपाईंलाई पठाइएको ६-अंकको OTP र नयाँ पासवर्ड हाल्नुहोस्।': 'आपको भेजा गया 6-अंकों का OTP और नया पासवर्ड डालें।',
+    'फोन नम्बर वा इमेल': 'फोन नंबर या ईमेल',
+    'OTP पठाउनुहोस्': 'OTP भेजें',
+    'डेमो OTP:': 'डेमो OTP:',
+    'यो डेमो हो — वास्तविक SMS/इमेल पठाइँदैन। वास्तविक प्रयोगमा यो कोड तपाईंको फोन/इमेलमा जान्छ।': 'यह डेमो है — असली SMS/ईमेल नहीं भेजा जाता। असली उपयोग में यह कोड आपके फोन/ईमेल पर जाता है।',
+    '६-अंकको OTP': '6-अंकों का OTP',
+    'नयाँ पासवर्ड': 'नया पासवर्ड',
+    'पासवर्ड बदल्नुहोस्': 'पासवर्ड बदलें',
+    'OTP फेरि पठाउनुहोस्': 'OTP दोबारा भेजें',
+    'लगइनमा फर्कनुहोस्': 'लॉगिन पर वापस जाएँ',
+    'ग्राहक': 'ग्राहक',
+    'पसले': 'दुकानदार',
+    'तपाईंको नाम': 'आपका नाम',
+    'पसलको नाम (जस्तै: राम किराना)': 'दुकान का नाम (जैसे: राम किराना)',
+    'पसलको प्रकार छान्नुहोस्': 'दुकान का प्रकार चुनें',
+    'अन्य': 'अन्य',
+    'पसलको प्रकार लेख्नुहोस् (जस्तै: फुल पसल)': 'दुकान का प्रकार लिखें (जैसे: फूल की दुकान)',
+    'लिँदैछ...': 'ले रहे हैं...',
+    'पसलको स्थान लिइयो ✓': 'दुकान का स्थान लिया गया ✓',
+    '📍 पसलको स्थान लिनुहोस् (नजिकका ग्राहकलाई देखाउन)': '📍 दुकान का स्थान सेट करें (पास के ग्राहकों तक पहुँचने के लिए)',
+    'पासवर्ड': 'पासवर्ड',
+    'लगइन गर्नुहोस्': 'लॉगिन करें',
+    'खाता बनाउनुहोस्': 'खाता बनाएँ',
+    'खाता छैन? ': 'खाता नहीं है? ',
+    'पहिले नै खाता छ? ': 'पहले से खाता है? ',
+    'दर्ता गर्नुहोस्': 'रजिस्टर करें',
+    'नयाँ OTP पठाइयो।': 'नया OTP भेजा गया।',
+    'पासवर्ड बदलियो! अब नयाँ पासवर्डले लगइन गर्नुहोस्।': 'पासवर्ड बदल गया! अब नए पासवर्ड से लॉगिन करें।',
+  };
+  const L = (nep, eng) => {
+    if (language === 'en') return eng;
+    if (language === 'hi') return HI[nep] || nep; // proper Hindi where known
+    return nep; // ne / mai / bho → Nepali Devanagari
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -74,7 +116,9 @@ export default function AuthScreen() {
     setDemoOtp(res.demoOtp);
     setForgotStep(1);
     const where = res.destinations.map(d => d.masked).join(ne ? ' र ' : ' & ');
-    setInfo(L(`OTP पठाइयो: ${where}`, `OTP sent to: ${where}`));
+    setInfo(language === 'en' ? `OTP sent to: ${where}`
+      : language === 'hi' ? `OTP भेजा गया: ${where}`
+      : `OTP पठाइयो: ${where}`);
   };
 
   // Forgot step 2 — verify OTP and set the new password.

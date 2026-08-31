@@ -35,7 +35,7 @@ export default function ShopkeeperHome() {
       <div className="shopkeeper-layout">
         <div className="empty-state-box">
           <div className="empty-state-icon">🏪</div>
-          <h3>{pick(language, { ne: 'पसल तयार हुँदैछ...', en: 'Setting up your shop...', mai: 'दोकान तैयार भऽ रहल...', bho: 'दोकान तैयार होत बा...' })}</h3>
+          <h3>{pick(language, { ne: 'पसल तयार हुँदैछ...', hi: 'दुकान तैयार हो रही है...', en: 'Setting up your shop...', mai: 'दोकान तैयार भऽ रहल...', bho: 'दोकान तैयार होत बा...' })}</h3>
         </div>
       </div>
     );
@@ -60,7 +60,7 @@ export default function ShopkeeperHome() {
         {/* Language selector — clearly labelled so shop owners can find it */}
         <div className="shopkeeper-lang-control">
           <span className="shopkeeper-lang-label">
-            <Globe size={14} /> {pick(language, { ne: 'भाषा', en: 'Language', mai: 'भाषा', bho: 'भाषा' })}
+            <Globe size={14} /> {pick(language, { ne: 'भाषा', hi: 'भाषा', en: 'Language', mai: 'भाषा', bho: 'भाषा' })}
           </span>
           <LanguagePicker compact={true} />
         </div>
@@ -82,7 +82,7 @@ export default function ShopkeeperHome() {
               className="quick-stat-badge stock"
               onClick={() => setActiveTab('inventory')}
             >
-              ⚠️ {lowStockProducts.length} {pick(language, { ne: 'कम स्टक', en: 'low stock', mai: 'कम स्टक', bho: 'कम स्टॉक' })}
+              ⚠️ {lowStockProducts.length} {pick(language, { ne: 'कम स्टक', hi: 'कम स्टॉक', en: 'low stock', mai: 'कम स्टक', bho: 'कम स्टॉक' })}
             </button>
           )}
         </div>

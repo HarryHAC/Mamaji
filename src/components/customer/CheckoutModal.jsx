@@ -61,7 +61,7 @@ export default function CheckoutModal() {
       setHasLocationPermission(true);
       setCustomerInfo(prev => ({ ...prev, lat: loc.lat, lng: loc.lng, hasLocationPermission: true }));
     } catch (e) {
-      showToast(pick(language, { ne: 'लोकेशन पाउन सकिएन', en: 'Could not get location', mai: 'लोकेशन नै भेटल', bho: 'लोकेशन ना मिलल' }), 'error');
+      showToast(pick(language, { ne: 'लोकेशन पाउन सकिएन', hi: 'लोकेशन नहीं मिला', en: 'Could not get location', mai: 'लोकेशन नै भेटल', bho: 'लोकेशन ना मिलल' }), 'error');
     } finally {
       setLocBusy(false);
     }
@@ -96,7 +96,7 @@ export default function CheckoutModal() {
     placeOrder({
       orderType,
       deliveryAddress: orderType === 'delivery' ? deliveryAddress : pick(language, {
-        ne: 'पसलबाट लिन आउने (Pickup)', en: 'Pickup from shop', mai: 'दोकानसँ लेबाक (Pickup)', bho: 'दोकान से लेबे के (Pickup)'
+        ne: 'पसलबाट लिन आउने (Pickup)', hi: 'दुकान से लेने आएँ (Pickup)', en: 'Pickup from shop', mai: 'दोकानसँ लेबाक (Pickup)', bho: 'दोकान से लेबे के (Pickup)'
       }),
       itemsSubtotal,
       deliveryCharge,
@@ -122,15 +122,15 @@ export default function CheckoutModal() {
     if (isWallet) {
       if (walletBalance < grandTotal) {
         showToast(pick(language, {
-          ne: 'वालेटमा पर्याप्त ब्यालेन्स छैन', en: 'Not enough wallet balance', mai: 'वालेटमे बैलेंस कम', bho: 'वालेट में बैलेंस कम'
+          ne: 'वालेटमा पर्याप्त ब्यालेन्स छैन', hi: 'वॉलेट में पर्याप्त बैलेंस नहीं', en: 'Not enough wallet balance', mai: 'वालेटमे बैलेंस कम', bho: 'वालेट में बैलेंस कम'
         }), 'error');
         return;
       }
       setIsSubmitting(true);
-      const r = walletPay(grandTotal, selectedShop?.ownerId, pick(language, { ne: 'अर्डर भुक्तानी', en: 'Order payment', mai: 'अर्डर भुगतान', bho: 'आर्डर भुगतान' }));
+      const r = walletPay(grandTotal, selectedShop?.ownerId, pick(language, { ne: 'अर्डर भुक्तानी', hi: 'ऑर्डर भुगतान', en: 'Order payment', mai: 'अर्डर भुगतान', bho: 'आर्डर भुगतान' }));
       if (!r.success) {
         setIsSubmitting(false);
-        showToast(pick(language, { ne: 'भुक्तानी असफल', en: 'Payment failed', mai: 'भुगतान असफल', bho: 'भुगतान असफल' }), 'error');
+        showToast(pick(language, { ne: 'भुक्तानी असफल', hi: 'भुगतान असफल', en: 'Payment failed', mai: 'भुगतान असफल', bho: 'भुगतान असफल' }), 'error');
         return;
       }
       setTimeout(completeOrder, 500);
@@ -197,7 +197,7 @@ export default function CheckoutModal() {
           {/* 2. Customer Contact & Delivery Info */}
           <div className="checkout-section">
             <h3 className="section-title">{pick(language, {
-              ne: 'ग्राहकको विवरण', en: 'Contact Details', mai: 'ग्राहकक विवरण', bho: 'ग्राहक के विवरण'
+              ne: 'ग्राहकको विवरण', hi: 'संपर्क विवरण', en: 'Contact Details', mai: 'ग्राहकक विवरण', bho: 'ग्राहक के विवरण'
             })}</h3>
             
             <div className="input-group">
@@ -241,10 +241,10 @@ export default function CheckoutModal() {
                 <button type="button" className="checkout-loc-btn" onClick={handleUseMyLocation} disabled={locBusy}>
                   <LocateFixed size={14} />
                   <span>{locBusy
-                    ? pick(language, { ne: 'लोकेशन लिँदैछ...', en: 'Getting location...', mai: 'लोकेशन लैत...', bho: 'लोकेशन लेत...' })
+                    ? pick(language, { ne: 'लोकेशन लिँदैछ...', hi: 'लोकेशन ले रहे हैं...', en: 'Getting location...', mai: 'लोकेशन लैत...', bho: 'लोकेशन लेत...' })
                     : hasLocationPermission && customerInfo.lat
-                      ? pick(language, { ne: '📍 लोकेशन सेयर गरियो ✓', en: '📍 Location shared ✓', mai: '📍 लोकेशन सेयर भेल ✓', bho: '📍 लोकेशन सेयर भइल ✓' })
-                      : pick(language, { ne: '📍 मेरो लाइभ लोकेशन प्रयोग गर्नुहोस्', en: '📍 Use my live location', mai: '📍 हमर लाइव लोकेशन', bho: '📍 हमार लाइव लोकेशन' })}</span>
+                      ? pick(language, { ne: '📍 लोकेशन सेयर गरियो ✓', hi: '📍 लोकेशन शेयर किया ✓', en: '📍 Location shared ✓', mai: '📍 लोकेशन सेयर भेल ✓', bho: '📍 लोकेशन सेयर भइल ✓' })
+                      : pick(language, { ne: '📍 मेरो लाइभ लोकेशन प्रयोग गर्नुहोस्', hi: '📍 मेरा लाइव लोकेशन इस्तेमाल करें', en: '📍 Use my live location', mai: '📍 हमर लाइव लोकेशन', bho: '📍 हमार लाइव लोकेशन' })}</span>
                 </button>
               </div>
             )}
@@ -255,7 +255,7 @@ export default function CheckoutModal() {
                 type="text"
                 className="form-input"
                 placeholder={pick(language, {
-                  ne: 'जस्तै: घरको गेट रातो छ, फोन गर्नुहोस्...',
+                  ne: 'जस्तै: घरको गेट रातो छ, फोन गर्नुहोस्...', hi: 'जैसे: घर का गेट लाल है, पहुँचने पर फोन करें...',
                   en: 'e.g. Red gate house, please call on arrival...',
                   mai: 'जेना: घरक गेट लाल अछि, फोन करू...',
                   bho: 'जइसे: घर के गेट लाल बा, फोन करीं...'
@@ -273,18 +273,18 @@ export default function CheckoutModal() {
                 <ShieldCheck size={22} className={hasLocationPermission ? 'icon-green' : 'icon-gray'} />
                 <div>
                   <h4 className="loc-title">{pick(language, {
-                    ne: 'स्थान गोपनीयता', en: 'Location Privacy', mai: 'स्थान गोपनीयता', bho: 'लोकेशन गोपनीयता'
+                    ne: 'स्थान गोपनीयता', hi: 'लोकेशन गोपनीयता', en: 'Location Privacy', mai: 'स्थान गोपनीयता', bho: 'लोकेशन गोपनीयता'
                   })}</h4>
                   <p className="loc-desc">
                     {hasLocationPermission
                       ? pick(language, {
-                          ne: 'डेलिभरीका लागि पसललाई स्थान पठाउने अनुमति दिइएको छ।',
+                          ne: 'डेलिभरीका लागि पसललाई स्थान पठाउने अनुमति दिइएको छ।', hi: 'डिलीवरी के लिए दुकान को लोकेशन भेजने की अनुमति दी गई है।',
                           en: 'You have allowed sharing your location with the shop for delivery.',
                           mai: 'डेलिभरीक लेल दोकानके स्थान पठएबाक अनुमति देल गेल अछि।',
                           bho: 'डेलिभरी खातिर दोकान के लोकेशन भेजे के अनुमति दिहल गइल बा।'
                         })
                       : pick(language, {
-                          ne: 'डेलिभरी सजिलो बनाउन आफ्नो स्थान पसललाई पठाउन सक्नुहुन्छ।',
+                          ne: 'डेलिभरी सजिलो बनाउन आफ्नो स्थान पसललाई पठाउन सक्नुहुन्छ।', hi: 'डिलीवरी आसान बनाने के लिए आप अपना लोकेशन दुकान को भेज सकते हैं।',
                           en: 'You can share your location with the shop to make delivery easier.',
                           mai: 'डेलिभरी सहज बनएबाक लेल अपन स्थान दोकानके पठा सकैत छी।',
                           bho: 'डेलिभरी आसान बनावे खातिर आपन लोकेशन दोकान के भेज सकीलें।'
@@ -298,8 +298,8 @@ export default function CheckoutModal() {
                 onClick={() => setHasLocationPermission(!hasLocationPermission)}
               >
                 {hasLocationPermission
-                  ? pick(language, { ne: 'अनुमति हटाउनुहोस्', en: 'Revoke access', mai: 'अनुमति हटाउ', bho: 'अनुमति हटाईं' })
-                  : pick(language, { ne: 'स्थान अनुमति दिनुहोस्', en: 'Allow location', mai: 'स्थान अनुमति दिअ\'', bho: 'लोकेशन अनुमति दीं' })}
+                  ? pick(language, { ne: 'अनुमति हटाउनुहोस्', hi: 'अनुमति हटाएँ', en: 'Revoke access', mai: 'अनुमति हटाउ', bho: 'अनुमति हटाईं' })
+                  : pick(language, { ne: 'स्थान अनुमति दिनुहोस्', hi: 'लोकेशन अनुमति दें', en: 'Allow location', mai: 'स्थान अनुमति दिअ\'', bho: 'लोकेशन अनुमति दीं' })}
               </button>
             </div>
           )}
@@ -323,9 +323,9 @@ export default function CheckoutModal() {
                   <Wallet size={24} />
                 </div>
                 <div className="pay-details">
-                  <span className="pay-title">{pick(language, { ne: 'मामा जी वालेट', en: 'Mama Ji Wallet', mai: 'मामा जी वालेट', bho: 'मामा जी वालेट' })}</span>
+                  <span className="pay-title">{pick(language, { ne: 'मामा जी वालेट', hi: 'मामा जी वॉलेट', en: 'Mama Ji Wallet', mai: 'मामा जी वालेट', bho: 'मामा जी वालेट' })}</span>
                   <span className="pay-desc">{pick(language, {
-                    ne: `ब्यालेन्स: रु ${toDevanagariNumerals(walletBalance)}`, en: `Balance: NPR ${walletBalance}`, mai: `बैलेंस: रु ${toDevanagariNumerals(walletBalance)}`, bho: `बैलेंस: रु ${toDevanagariNumerals(walletBalance)}`
+                    ne: `ब्यालेन्स: रु ${toDevanagariNumerals(walletBalance)}`, hi: `बैलेंस: रु ${toDevanagariNumerals(walletBalance)}`, en: `Balance: NPR ${walletBalance}`, mai: `बैलेंस: रु ${toDevanagariNumerals(walletBalance)}`, bho: `बैलेंस: रु ${toDevanagariNumerals(walletBalance)}`
                   })}</span>
                 </div>
               </label>
@@ -345,7 +345,7 @@ export default function CheckoutModal() {
                 <div className="pay-details">
                   <span className="pay-title">Cash on Delivery</span>
                   <span className="pay-desc">{pick(language, {
-                    ne: 'सामान पाएपछि नगद दिने', en: 'Pay cash when you receive', mai: 'सामान भेटलाक बाद नगद दिअ\'', bho: 'सामान मिलला के बाद नगद दीं'
+                    ne: 'सामान पाएपछि नगद दिने', hi: 'सामान मिलने पर नगद दें', en: 'Pay cash when you receive', mai: 'सामान भेटलाक बाद नगद दिअ\'', bho: 'सामान मिलला के बाद नगद दीं'
                   })}</span>
                 </div>
               </label>
@@ -366,7 +366,7 @@ export default function CheckoutModal() {
                   <div className="pay-details">
                     <span className="pay-title">eSewa Mobile Wallet</span>
                     <span className="pay-desc">
-                      {pick(language, { ne: 'पसलेको eSewa ID:', en: "Shop's eSewa ID:", mai: 'दोकानक eSewa ID:', bho: 'दोकान के eSewa ID:' })} <strong>{selectedShop.paymentSettings.esewaId}</strong>
+                      {pick(language, { ne: 'पसलेको eSewa ID:', hi: 'दुकान का eSewa ID:', en: "Shop's eSewa ID:", mai: 'दोकानक eSewa ID:', bho: 'दोकान के eSewa ID:' })} <strong>{selectedShop.paymentSettings.esewaId}</strong>
                     </span>
                   </div>
                 </label>
@@ -388,7 +388,7 @@ export default function CheckoutModal() {
                   <div className="pay-details">
                     <span className="pay-title">Khalti Digital Wallet</span>
                     <span className="pay-desc">
-                      {pick(language, { ne: 'पसलेको Khalti ID:', en: "Shop's Khalti ID:", mai: 'दोकानक Khalti ID:', bho: 'दोकान के Khalti ID:' })} <strong>{selectedShop.paymentSettings.khaltiId}</strong>
+                      {pick(language, { ne: 'पसलेको Khalti ID:', hi: 'दुकान का Khalti ID:', en: "Shop's Khalti ID:", mai: 'दोकानक Khalti ID:', bho: 'दोकान के Khalti ID:' })} <strong>{selectedShop.paymentSettings.khaltiId}</strong>
                     </span>
                   </div>
                 </label>
@@ -437,7 +437,7 @@ export default function CheckoutModal() {
           {/* 5. Order Total Bill Card */}
           <div className="checkout-bill-card">
             <div className="bill-line">
-              <span>{t.subtotal} ({cart.length} {pick(language, { ne: 'सामान', en: 'items', mai: 'सामान', bho: 'सामान' })}):</span>
+              <span>{t.subtotal} ({cart.length} {pick(language, { ne: 'सामान', hi: 'सामान', en: 'items', mai: 'सामान', bho: 'सामान' })}):</span>
               <strong>रु {toDevanagariNumerals(itemsSubtotal)}</strong>
             </div>
             <div className="bill-line">
@@ -473,8 +473,8 @@ export default function CheckoutModal() {
             disabled={isSubmitting || cart.length === 0}
           >
             {isSubmitting ? t.loading : `${isOnlinePayment
-              ? pick(language, { ne: 'अनलाइन भुक्तानी गर्नुहोस्', en: 'Pay Online', mai: 'अनलाइन भुगतान करू', bho: 'अनलाइन भुगतान करीं' })
-              : pick(language, { ne: 'अर्डर पक्का गर्नुहोस्', en: 'Confirm Order', mai: 'अर्डर पक्का करू', bho: 'आर्डर पक्का करीं' })
+              ? pick(language, { ne: 'अनलाइन भुक्तानी गर्नुहोस्', hi: 'ऑनलाइन भुगतान करें', en: 'Pay Online', mai: 'अनलाइन भुगतान करू', bho: 'अनलाइन भुगतान करीं' })
+              : pick(language, { ne: 'अर्डर पक्का गर्नुहोस्', hi: 'ऑर्डर पक्का करें', en: 'Confirm Order', mai: 'अर्डर पक्का करू', bho: 'आर्डर पक्का करीं' })
             } (रु ${toDevanagariNumerals(grandTotal)})`}
           </button>
         </div>
@@ -524,12 +524,12 @@ export default function CheckoutModal() {
                   <div className="pay-spinner" />
                   <h3 className="pay-gateway-title">
                     {pick(language, {
-                      ne: 'भुक्तानी प्रक्रियामा छ...', en: 'Processing payment...', mai: 'भुगतान प्रक्रियामे अछि...', bho: 'भुगतान प्रोसेस में बा...'
+                      ne: 'भुक्तानी प्रक्रियामा छ...', hi: 'भुगतान प्रोसेस हो रहा है...', en: 'Processing payment...', mai: 'भुगतान प्रक्रियामे अछि...', bho: 'भुगतान प्रोसेस में बा...'
                     })}
                   </h3>
                   <p className="pay-gateway-amount">रु {toDevanagariNumerals(grandTotal)}</p>
                   <p className="pay-gateway-via">
-                    {pick(language, { ne: 'माध्यम', en: 'via', mai: 'माध्यम', bho: 'माध्यम' })}: {' '}
+                    {pick(language, { ne: 'माध्यम', hi: 'माध्यम', en: 'via', mai: 'माध्यम', bho: 'माध्यम' })}: {' '}
                     {paymentMethod === 'esewa' ? 'eSewa' : paymentMethod === 'khalti' ? 'Khalti' : 'Bank / QR'}
                   </p>
                 </>
@@ -540,7 +540,7 @@ export default function CheckoutModal() {
                   </div>
                   <h3 className="pay-gateway-title success">
                     {pick(language, {
-                      ne: 'भुक्तानी सफल भयो!', en: 'Payment Successful!', mai: 'भुगतान सफल भेल!', bho: 'भुगतान सफल भइल!'
+                      ne: 'भुक्तानी सफल भयो!', hi: 'भुगतान सफल हुआ!', en: 'Payment Successful!', mai: 'भुगतान सफल भेल!', bho: 'भुगतान सफल भइल!'
                     })}
                   </h3>
                   <p className="pay-gateway-amount">रु {toDevanagariNumerals(grandTotal)}</p>

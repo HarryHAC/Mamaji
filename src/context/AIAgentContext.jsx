@@ -349,6 +349,7 @@ export function AIAgentProvider({ children }) {
           const unavailable = result.unavailable || [];
           const unNote = unavailable.length ? pick(language, {
             ne: `\n\n⚠️ अहिले उपलब्ध छैन: ${unavailable.join(', ')}।`,
+            hi: `\n\n⚠️ अभी उपलब्ध नहीं: ${unavailable.join(', ')}।`,
             en: `\n\n⚠️ Not available right now: ${unavailable.join(', ')}.`,
             mai: `\n\n⚠️ एखन उपलब्ध नै: ${unavailable.join(', ')}।`,
             bho: `\n\n⚠️ अभी उपलब्ध नइखे: ${unavailable.join(', ')}।`
@@ -366,6 +367,7 @@ export function AIAgentProvider({ children }) {
 
             const summary = pick(language, {
               ne: `तपाईंले चाहनुभएको सामान:\n${devLines}${unNote}\n\nसामानको जम्मा: रु ${dn(subtotal)}\nडेलिभरी शुल्क: रु ${dn(delivery)}\nकुल रकम: रु ${dn(grand)}`,
+              hi: `आपका सामान:\n${devLines}${unNote}\n\nसामान का कुल: रु ${dn(subtotal)}\nडिलीवरी शुल्क: रु ${dn(delivery)}\nकुल राशि: रु ${dn(grand)}`,
               en: `Your order:\n${enLines}${unNote}\n\nSubtotal: NPR ${subtotal}\nDelivery: NPR ${delivery}\nTotal: NPR ${grand}`,
               mai: `अहाँक सामान:\n${devLines}${unNote}\n\nसामानक कुल: रु ${dn(subtotal)}\nडेलिभरी शुल्क: रु ${dn(delivery)}\nजम्मा रकम: रु ${dn(grand)}`,
               bho: `रउरा सामान:\n${devLines}${unNote}\n\nसामान के कुल: रु ${dn(subtotal)}\nडेलिभरी चार्ज: रु ${dn(delivery)}\nकुल रकम: रु ${dn(grand)}`
