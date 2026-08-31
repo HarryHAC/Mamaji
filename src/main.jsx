@@ -28,6 +28,20 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 // so Vite's dev HMR is never intercepted by the cache).
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => { /* ignore */ });
+    navigator.serviceWorker.register('/sw.js').then((reg) => {
+      // Check for a newer service worker right away and on every focus, so a
+      // fresh deploy (e.g. the real-OTP release) is picked up without the user
+      // having to hard-refresh or reinstall the PWA.
+      reg.update().catch(() => {});
+      setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
+    }).catch(() => { /* ignore */ });
+
+    // When a new SW takes control, reload once so the new bundle is shown.
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
   });
 }
